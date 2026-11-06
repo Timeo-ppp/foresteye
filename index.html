@@ -1268,6 +1268,10 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <span class="sub">avertissement sur les journées de terrain</span>
         <input type="number" id="cfgSeuilGrand" min="1" step="1" style="width:120px">
       </label>
+      <label class="f">Placettes mesurées avant d'en ajouter
+        <span class="sub">variabilité indicative en dessous (5 par défaut)</span>
+        <input type="number" id="cfgPilote" min="2" max="30" step="1" style="width:120px">
+      </label>
     </div>
     <!-- zone de référence 50 × 50 m retirée le 06/11/2026 (validation par comptage des lignes et comparaison physique / Arboreal) -->
     <input type="checkbox" id="cfgRefZone" hidden>
@@ -1899,6 +1903,7 @@ const CONFIG_DEFAULT = {
   methode: "auto",        // "auto" (selon la surface), "placettes" ou "plein" (inventaire en plein)
   seuilPleinHa: 1,        // en dessous : inventaire en plein conseillé
   seuilGrandHa: 20,       // au-dessus : placettes, avec avertissement sur les journées de terrain
+  nPilote: 5,             // placettes mesurées avant de proposer d'en ajouter (variabilité jugée assez stable)
   refZone: false,         // inventaire en plein d'une zone de référence de 50 × 50 m (validation de la méthode)
   // temps de terrain : hypothèses ajustables (Réglages)
   tpsMinPlacette: 30, tpsVitesseKmh: 2, tpsHeuresJour: 6, tpsPersonnes: 2,
@@ -3032,6 +3037,7 @@ function renderParcelle() {
   $("#cfgMethode").value = methodeForcee() || "auto";
   $("#cfgSeuilPlein").value = state.config.seuilPleinHa;
   $("#cfgSeuilGrand").value = state.config.seuilGrandHa;
+  $("#cfgPilote").value = nPilote();
   $("#cfgRefZone").checked = !!state.config.refZone;
   $("#cfgShowFP").checked = !!state.config.showFP;
   $("#fpAccesTxt").textContent = MSG_ACCES_FP;
@@ -5802,6 +5808,10 @@ function plAddExtra(k) {
   if (!plan.ringKey) plan.ringKey = plHash(ring);
   return pts;
 }
+/* nombre de placettes mesurées à partir duquel la variabilité sert à compléter le plan :
+   l'incertitude relative sur l'écart-type vaut environ 1 / √(2(n-1)), soit ± 70 % à 2 placettes,
+   ± 35 % à 5, ± 24 % à 10 ; 5 = échantillon pilote, encore tôt dans la campagne. */
+function nPilote() { const v = parseInt(state.config.nPilote, 10); return v >= 2 && v <= 30 ? v : 5; }
 function blocCompleter(e) {
   const plan = state.plan, nPlan = plan.points.length;
   if (!e || !e.m || !nPlan) return null;
@@ -5809,6 +5819,12 @@ function blocCompleter(e) {
   const th = state.config.threshold, cf = fmt(state.config.conf * 100, 0);
   const box = el("div", { class: "card-lite", style: "display:flex; flex-direction:column; gap:8px; margin-top:4px" });
   box.appendChild(el("b", { text: "Compléter le plan d'après les mesures" }));
+  const np = nPilote();
+  if (e.m.base < np) {
+    box.appendChild(el("p", { style: "margin:0", html: "Disponible à partir de <b>" + np + " placettes mesurées</b> (" + e.m.base + " / " + np + " pour l'instant). Avec si peu de placettes, la variabilité mesurée est encore très incertaine (environ ± " + fmt(100 / Math.sqrt(2 * (e.m.base - 1)), 0) + " %) : le nombre de placettes à ajouter pourrait être très faux." }));
+    box.appendChild(el("p", { class: "hint", style: "margin:0", text: "Le seuil se règle dans Réglages." }));
+    return box;
+  }
   const objIn = el("input", { id: "plObjE", type: "number", min: "1", max: "50", step: "1", value: String(th), style: "width:70px", "aria-label": "Marge visée (%)" });
   objIn.addEventListener("change", () => { const v = num(objIn.value); if (v >= 1 && v <= 50) { state.config.threshold = v; persist(); renderAll(); } });
   box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px" }, [el("span", { text: "Précision visée : ±" }), objIn, el("span", { text: "% sur le volume (confiance " + cf + " %)." })]));
@@ -5942,7 +5958,7 @@ function estimateBlock(opts) {
   box.appendChild(el("p", { class: "hint", style: "margin:0", text: "50 % est la valeur d'exemple du protocole de suivi des réserves forestières (PSDRF). Une plantation régulière, comme une peupleraie, varie en général moins ; une forêt mélangée et irrégulière plutôt plus. Ce n'est qu'une hypothèse : la variabilité réelle la remplace dès 2 placettes mesurées." }));
   // estimation mise à jour d'après les mesures
   if (e.cur) {
-    box.appendChild(el("div", { html: "D'après les " + e.m.base + " placettes mesurées (variabilité mesurée : " + fmt(e.m.cv * 100, 0) + " %) : environ <b>" + e.cur.n + " placettes</b>." + (e.m.demo ? " <i>Calcul sur l'exemple fictif.</i>" : "") }));
+    box.appendChild(el("div", { html: "D'après les " + e.m.base + " placettes mesurées (variabilité mesurée : " + fmt(e.m.cv * 100, 0) + " %) : environ <b>" + e.cur.n + " placettes</b>." + (e.m.base < nPilote() ? " <i>Indicatif : moins de " + nPilote() + " placettes mesurées.</i>" : "") + (e.m.demo ? " <i>Calcul sur l'exemple fictif.</i>" : "") }));
     const ref = plan.est0 && plan.est0.n ? plan.est0 : { n: e.prior.n, cv: e.cvPrior, fromPrior: true };
     if (ref.n !== e.cur.n) {
       const more = e.cur.n > ref.n;
@@ -6924,6 +6940,7 @@ function wire() {
     if (v === "auto") { state.config.methode = "auto"; renderAll(); } else choisirMethode(v).then(() => renderParcelle());
   });
   $("#cfgSeuilPlein").addEventListener("change", e => { const v = num(e.target.value); if (v > 0 && v < state.config.seuilGrandHa) { state.config.seuilPleinHa = v; renderAll(); } else { toast("Seuil entre 0 et " + fmt(state.config.seuilGrandHa, 0) + " ha"); renderParcelle(); } });
+  $("#cfgPilote").addEventListener("change", e => { const v = parseInt(e.target.value, 10); if (v >= 2 && v <= 30) { state.config.nPilote = v; renderAll(); } else { toast("Entre 2 et 30 placettes"); e.target.value = nPilote(); } });
   $("#cfgSeuilGrand").addEventListener("change", e => { const v = num(e.target.value); if (v > state.config.seuilPleinHa) { state.config.seuilGrandHa = v; renderAll(); } else { toast("Le seuil « grande forêt » doit dépasser celui de l'inventaire en plein"); renderParcelle(); } });
   $("#cfgRefZone").addEventListener("change", e => { state.config.refZone = e.target.checked; renderAll(); });
   $("#cfgShowFP").addEventListener("change", e => { state.config.showFP = e.target.checked; PL.fpOn = null; renderAll(); });
