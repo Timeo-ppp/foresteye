@@ -9,7 +9,7 @@
    Les services en ligne (cadastre, communes, forêts publiques) passent
    toujours par le réseau.
    ===================================================================== */
-const VERSION = 7;
+const VERSION = 8;
 const CACHE_APP = "foresteye-app-v" + VERSION;
 const CACHE_TUILES = "foresteye-tuiles";
 const COEUR = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];

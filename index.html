@@ -1099,7 +1099,14 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <div id="arbImport" class="panel">
       <div class="note info">
         <b>Sur le terrain avec Arboreal</b>
-        <p>Rejoignez chaque placette avec le guidage de l'étape 1, puis mesurez-la dans Arboreal. Nommez-la dans Arboreal avec son numéro du plan si possible. En lisière, ne mesurez que les arbres côté forêt. Arboreal mesure une hauteur par placette. Dans une plantation homogène (même essence, même âge), cette hauteur suffit : c'est le choix fait à La Tremblade, à citer comme limite. Dans un peuplement mélangé ou irrégulier, complétez à l'étape b la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne.</p>
+        <ol style="margin:6px 0 8px; padding-left:20px">
+          <li>Une seule session Arboreal pour la journée.</li>
+          <li>Rejoignez chaque placette avec le guidage de l'étape 1, puis créez <b>une placette Arboreal par placette du plan</b>.</li>
+          <li><b>Nommez chaque placette Arboreal avec son numéro du plan</b> (« 7 » pour la placette n° 7). C'est ce numéro qui rattache les arbres à la bonne placette. Sans lui, le rattachement se fait par la position GPS, moins sûre sous couvert (10 à 20 m d'erreur, placettes voisines confondues).</li>
+          <li>Ne mettez jamais les arbres de plusieurs placettes dans la même placette Arboreal.</li>
+          <li><b>En fin de journée, un seul export</b> de la session (les 5 fichiers CSV), à déposer ci-dessous. Un export intermédiaire à midi sert de sauvegarde en cas de problème de téléphone.</li>
+        </ol>
+        <p>En lisière, ne mesurez que les arbres côté forêt. Arboreal mesure une hauteur par placette. Dans une plantation homogène (même essence, même âge), cette hauteur suffit : c'est le choix fait à La Tremblade, à citer comme limite. Dans un peuplement mélangé ou irrégulier, complétez à l'étape b la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne.</p>
       </div>
       <div class="drop" id="drop">
         <h3>Déposez les fichiers exportés par Arboreal</h3>
@@ -2770,7 +2777,9 @@ async function handleFiles(fileList) {
       if (vals.length > 3 && new Set(vals).size === 1) ss.sharedHeights[p] = vals[0];
     });
     // rattachement au plan, puis numérotation : numéro du plan, sinon nom saisi dans Arboreal, sinon premier numéro libre
+    const nSansNum = ss.samples.filter(s => !(parseInt(clean(s.external_name) || clean(s.external_id), 10) > 0)).length;
     const nLinked = linkSamplesToPlan(ss.samples);
+    if (nSansNum) report.push({ f: "samples.csv", kind: "nommage", msg: nSansNum + " placette" + (nSansNum > 1 ? "s" : "") + " sans numéro du plan dans Arboreal : rattachement par la position GPS, à vérifier sur la carte. La prochaine fois, nommez chaque placette avec son numéro." });
     if (state.plan.points.length) report.push({ f: "Plan de placettes", kind: "plan", msg: nLinked + " placette(s) sur " + ss.samples.length + " rattachée(s) au plan" + (nLinked < ss.samples.length ? " : rattachez les autres à la main ci-dessous" : "") });
     ss.samples.forEach(s => {
       const id = clean(s.sample_id), q = planPointById(clean(s.plan_id));
@@ -4265,7 +4274,7 @@ function renderHelp() {
 
   $("#formatHelp").innerHTML =
     "<p><b>Saisie manuelle ForestEye (contrôle)</b> : rien à importer. Les relevés saisis dans 2 · Mesurer sont enregistrés avec les mêmes colonnes que samples.csv et trees.csv, plus la distance et l'azimut de chaque arbre, la mesure brute du tronc et l'origine de la hauteur (clinomètre, saisie directe ou estimée).</p>" +
-    "<p><b>Arboreal Forest (méthode de référence)</b> : l'application accepte les cinq fichiers exportés par Arboreal Forest. <b>samples.csv</b> et <b>trees.csv</b> suffisent à tous les calculs.</p>" +
+    "<p><b>Arboreal Forest (méthode de référence)</b> : nommez chaque placette Arboreal avec son numéro du plan, puis faites un seul export de la session en fin de journée. L'application accepte les cinq fichiers exportés par Arboreal Forest. <b>samples.csv</b> et <b>trees.csv</b> suffisent à tous les calculs.</p>" +
     "<ul><li><b>samples.csv</b> : une ligne par placette (identifiant, surface réellement mesurée, rayon, position du centre).</li>" +
     "<li><b>trees.csv</b> : une ligne par arbre (placette, essence, diamètre à 1,30 m en cm, hauteur en m, coordonnées locales et GPS).</li>" +
     "<li><b>stems.csv</b> : une ligne par tige. Conservé tel quel ; un arbre à plusieurs tiges n'est compté qu'une fois, à partir de trees.csv.</li>" +
