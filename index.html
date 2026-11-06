@@ -1215,8 +1215,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
         </select>
       </label>
       <label class="f" for="errThreshold"><span>Marge d'erreur visée (± %) <button class="helpdot" type="button" data-aide="De combien le résultat peut s'écarter de la vraie valeur, avec le niveau de confiance choisi. « 100 m³ ± 10 % » : la vraie valeur est entre 90 et 110 m³. Sert à calculer le nombre de placettes.">?</button></span>
-        <span class="sub">objectif par défaut : ± 10 %</span>
-        <input type="number" id="errThreshold" value="10" min="1" max="50" step="0.5" style="width:110px">
+        <span class="sub">norme ForestEye : ± 15 % (± 10 % pour une vente de bois)</span>
+        <input type="number" id="errThreshold" value="15" min="1" max="50" step="0.5" style="width:110px">
       </label>
       <label class="f">Hauteurs non mesurées
         <select id="hMode">
@@ -1598,7 +1598,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <div><dt>Écart-type entre placettes</dt><dd>Dit si les placettes se ressemblent. Des placettes très différentes entre elles rendent l'estimation moins sûre.</dd></div>
         <div><dt>Coefficient de Student (t)</dt><dd>Un facteur qui élargit la marge quand on a peu de placettes. Avec 3 placettes il vaut 2,92 à 90 % ; avec 20 placettes, 1,73. Peu de placettes = marge large.</dd></div>
         <div><dt>Marge d'erreur ± E %</dt><dd>La marge exprimée en pourcentage du résultat, avec un niveau de confiance (90 % par défaut). « 100 m³ ± 8 % » signifie : avec 90 % de confiance, le volume réel est entre 92 et 108 m³.</dd></div>
-        <div><dt>Objectif de précision</dt><dd>Par défaut, une marge de ± 10 % au plus, avec 90 % de confiance : « ± 10 % (confiance 90 %) ». Les deux chiffres se règlent dans Réglages. Une marge de ± 10 % ne veut pas dire « fiable à 90 % » : elle dit de combien le résultat peut s'écarter de la vraie valeur.</dd></div>
+        <div><dt>Objectif de précision : la norme ForestEye</dt><dd>Une marge de <b>± 15 % au plus sur le volume, avec 90 % de confiance</b> : « ± 15 % (confiance 90 %) ». C'est assez précis pour qu'un propriétaire connaisse ce qu'il a, et faisable en une demi-journée à deux. Visez <b>± 10 %</b> seulement si le chiffre sert à une décision d'argent (vente de bois, estimation d'une coupe) : il faut environ deux fois plus de placettes. Descendre sous ± 10 % est inutile : les erreurs que la marge ne compte pas (coefficients de forme, hauteurs estimées, mesures) sont du même ordre. Diviser la marge par 2 demande 4 fois plus de placettes. Les deux chiffres se règlent dans Réglages. Une marge de ± 15 % ne veut pas dire « fiable à 85 % » : elle dit de combien le résultat peut s'écarter de la vraie valeur.</dd></div>
         <div><dt>Combien de placettes ?</dt><dd>L'étape 1 · Préparer l'estime dès que la forêt est délimitée : <span class="formula">n = (t × CV / E)²</span>, CV étant la variabilité du volume entre placettes et E la marge visée. Avant toute mesure, CV est une hypothèse (50 % par défaut) ; dès 2 placettes mesurées, la variabilité réelle la remplace et l'application signale si l'estimation change. Sur une petite forêt, le nombre est corrigé par <span class="formula">n / (1 + n / N)</span>, N étant le nombre de placettes que contient la forêt.</dd></div>
         <div><dt>Comment réduire la marge ?</dt><dd>Ajouter des placettes : la marge décroît comme 1/√n. L'étape 1 · Préparer calcule le nombre de placettes nécessaire dès que deux placettes sont mesurées, donne la marge attendue pour un nombre donné et ajoute au plan les placettes manquantes, dans les zones les moins couvertes, sans déplacer celles déjà mesurées. Séparer les essences ne rend pas le total plus précis. Si la forêt a des zones nettement différentes (une peupleraie et une chênaie, par exemple), on peut en faire deux inventaires séparés, un par zone.</dd></div>
         <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse ; la Synthèse compare Arboreal et la saisie manuelle.</dd></div>
@@ -1912,7 +1912,7 @@ const SERIES = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6", "--s7", "--s8"];
 
 /* réglages par défaut ; un projet ancien sans ces clés les reçoit à l'ouverture */
 const CONFIG_DEFAULT = {
-  conf: 0.90, threshold: 10, areaMode: "real", posMode: "plan", posModeV2: true, rotAuto: true, rot: 0, baseMap: "ign", colorBy: "species", heightMode: "courbe", voie: "", fpc: true,
+  conf: 0.90, threshold: 15, normeV1: true, areaMode: "real", posMode: "plan", posModeV2: true, rotAuto: true, rot: 0, baseMap: "ign", colorBy: "species", heightMode: "courbe", voie: "", fpc: true,
   methode: "auto",        // "auto" (selon la surface), "placettes" ou "plein" (inventaire en plein)
   seuilPleinHa: 1,        // en dessous : inventaire en plein conseillé
   seuilGrandHa: 20,       // au-dessus : placettes, avec avertissement sur les journées de terrain
@@ -4183,6 +4183,7 @@ function loadProject(j, quiet) {
   state.plotLabels = j.plotLabels || {};
   state.config = Object.assign({}, CONFIG_DEFAULT, j.config || {});
   state.config.refZone = false;   // zone de référence 50 × 50 m abandonnée le 06/11/2026
+  if (!(j.config && j.config.normeV1)) { state.config.threshold = 15; state.config.conf = 0.90; state.config.normeV1 = true; }   // 06/11/2026 : norme ± 15 % à 90 %
   if (!(j.config && j.config.posModeV2)) { state.config.posMode = "plan"; state.config.posModeV2 = true; }   // 06/11/2026 : centre du plan par défaut
   state.field = Object.assign({}, FIELD_DEFAULT, j.field || {});
   state.plan = Object.assign(JSON.parse(JSON.stringify(PLAN_DEFAULT)), j.plan || {});
