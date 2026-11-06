@@ -1474,8 +1474,15 @@ input.fx-big{font-size:18px; padding:10px 12px}
           <option value="gps">GPS de chaque arbre (imprécis sous couvert)</option>
         </select>
       </label>
-      <label class="f" id="rotWrap" hidden>Orientation du repère
-        <span class="sub">azimut du repère local, en degrés</span>
+      <label class="f" id="rotAutoWrap" hidden>Orientation des placettes
+        <span class="sub">redressement d'après le GPS des arbres</span>
+        <select id="rotAuto">
+          <option value="1">Automatique, par placette</option>
+          <option value="0">Manuelle (azimut ci-contre)</option>
+        </select>
+      </label>
+      <label class="f" id="rotWrap" hidden>Correction d'azimut
+        <span class="sub">en degrés, ajoutée à toutes les placettes</span>
         <input type="number" id="rotDeg" value="0" step="5" style="width:110px">
       </label>
       <label class="f">Fond de carte
@@ -1905,7 +1912,7 @@ const SERIES = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6", "--s7", "--s8"];
 
 /* réglages par défaut ; un projet ancien sans ces clés les reçoit à l'ouverture */
 const CONFIG_DEFAULT = {
-  conf: 0.90, threshold: 10, areaMode: "real", posMode: "plan", posModeV2: true, rot: 0, baseMap: "ign", colorBy: "species", heightMode: "courbe", voie: "", fpc: true,
+  conf: 0.90, threshold: 10, areaMode: "real", posMode: "plan", posModeV2: true, rotAuto: true, rot: 0, baseMap: "ign", colorBy: "species", heightMode: "courbe", voie: "", fpc: true,
   methode: "auto",        // "auto" (selon la surface), "placettes" ou "plein" (inventaire en plein)
   seuilPleinHa: 1,        // en dessous : inventaire en plein conseillé
   seuilGrandHa: 20,       // au-dessus : placettes, avec avertissement sur les journées de terrain
@@ -3718,6 +3725,37 @@ const BASEMAPS = {
   },
   osm: { url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", attr: "© contributeurs OpenStreetMap", max: 19 }
 };
+/* orientation du repère local d'une placette, retrouvée d'après le GPS des arbres.
+   Le GPS des arbres d'Arboreal est décalé d'un bloc (erreur du centre), mais garde la forme du nuage :
+   la rotation qui superpose au mieux les positions relatives (x, -z) au GPS (est, nord), centrés, est
+   la solution des moindres carrés (Procuste) θ = atan2(Σ(vE - uN), Σ(uE + vN)).
+   Fiable si au moins 3 arbres assez écartés et un écart résiduel faible. */
+const ROT_CACHE = {};
+function plotRotAuto(p) {
+  if (!p) return {};
+  const key = p.id + "|" + p.sessionId;
+  if (ROT_CACHE[key]) return ROT_CACHE[key];
+  const ts = treeEntries().filter(t => t.plotId === p.id && isFinite(t.x) && isFinite(t.z) && isFinite(t.lat) && isFinite(t.lon));
+  const vus = new Set(), pts = [];
+  ts.forEach(t => { const k = t.soucheId; if (vus.has(k)) return; vus.add(k); pts.push(t); });   // une position par souche
+  let res = { n: pts.length };
+  if (pts.length >= 3) {
+    const m = mPerDeg(pts[0].lat);
+    const P = pts.map(t => ({ u: t.x, v: -t.z, E: t.lon * m.lon, N: t.lat * m.lat }));
+    const mean = k => P.reduce((a, q) => a + q[k], 0) / P.length;
+    const mu = mean("u"), mv = mean("v"), mE = mean("E"), mN = mean("N");
+    let sxx = 0, sxy = 0, spread = 0;
+    P.forEach(q => { const u = q.u - mu, v = q.v - mv, E = q.E - mE, N = q.N - mN; sxx += u * E + v * N; sxy += v * E - u * N; spread += u * u + v * v; });
+    const th = Math.atan2(sxy, sxx), c = Math.cos(th), sn = Math.sin(th);
+    let r2 = 0;
+    P.forEach(q => { const u = q.u - mu, v = q.v - mv, E = q.E - mE, N = q.N - mN; r2 += (E - (u * c + v * sn)) ** 2 + (N - (-u * sn + v * c)) ** 2; });
+    const resid = Math.sqrt(r2 / P.length), etendue = Math.sqrt(spread / P.length);
+    const ok = etendue >= 1.5 && resid <= Math.max(3, etendue * 0.8);
+    res = { n: P.length, deg: ok ? ((th * 180 / Math.PI) + 360) % 360 : 0, resid, ok };
+  }
+  ROT_CACHE[key] = res;
+  return res;
+}
 /* position cartographique d'un arbre selon le mode choisi */
 function treeLatLon(t) {
   const mode = state.config.posMode;
@@ -3726,7 +3764,7 @@ function treeLatLon(t) {
   if (!p || !isFinite(p.lat) || !isFinite(p.lon) || !isFinite(t.x) || !isFinite(t.z)) {
     return isFinite(t.lat) && isFinite(t.lon) ? [t.lat, t.lon] : null;
   }
-  const th = (state.config.rot || 0) * Math.PI / 180;
+  const th = ((state.config.rot || 0) + (state.config.rotAuto !== false ? plotRotAuto(p).deg || 0 : 0)) * Math.PI / 180;
   const u = t.x, v = -t.z;
   const E = u * Math.cos(th) + v * Math.sin(th);
   const N = -u * Math.sin(th) + v * Math.cos(th);
@@ -3740,6 +3778,8 @@ function diamColor(D) {
 }
 function renderMap() {
   const notice = $("#mapNotice"); notice.innerHTML = "";
+  Object.keys(ROT_CACHE).forEach(k => delete ROT_CACHE[k]);
+  $("#rotAutoWrap").hidden = state.config.posMode === "gps";
   $("#rotWrap").hidden = state.config.posMode === "gps";
   const holder = $("#map");
   if (typeof L === "undefined") {
@@ -3831,7 +3871,14 @@ function renderMap() {
       (state.config.posMode === "plan"
         ? 'Centre utilisé : <b>le centre prévu du plan</b>, rejoint avec le guidage GPS' + (nPlan ? ' (' + nPlan + ' placette' + (nPlan > 1 ? 's' : '') + (ecarts.length ? ' ; écart médian avec le centre relevé par Arboreal : ' + fmt(ecarts[Math.floor(ecarts.length / 2)], 0) + ' m, au plus ' + fmt(ecarts[ecarts.length - 1], 0) + ' m' : '') + ')' : '') + '.' + (nArb ? ' ' + nArb + ' placette' + (nArb > 1 ? 's' : '') + ' non rattachée' + (nArb > 1 ? 's' : '') + ' au plan : centre Arboreal.' : '')
         : 'Centre utilisé : le centre relevé par Arboreal.') +
-      ' L\'export Arboreal ne donne pas l\'orientation du repère : si le nuage d\'arbres semble tourné, ajustez l\'azimut. Les calculs (volumes, marges) n\'utilisent pas les positions.</div>');
+      ' ' + (() => {
+        if (state.config.rotAuto === false) return 'Orientation manuelle : azimut de ' + fmt(state.config.rot || 0, 0) + '° pour toutes les placettes.';
+        const rs = plots.filter(p => !p.raw.field).map(p => plotRotAuto(p)), ok = rs.filter(r => r.ok);
+        const degs = ok.map(r => r.deg > 180 ? r.deg - 360 : r.deg).sort((a, b) => a - b);
+        return 'Orientation <b>redressée automatiquement</b> pour ' + ok.length + ' placette' + (ok.length > 1 ? 's' : '') + ' sur ' + rs.length + ' d\'après le GPS des arbres' +
+          (degs.length ? ' (rotation de ' + fmt(degs[0], 0) + '° à ' + fmt(degs[degs.length - 1], 0) + '°, écart résiduel médian ' + fmt(ok.map(r => r.resid).sort((a, b) => a - b)[Math.floor(ok.length / 2)], 1) + ' m)' : '') + '.' +
+          (rs.length > ok.length ? ' Les autres (moins de 3 arbres ou GPS trop dispersé) gardent le repère tel quel.' : '') + (state.config.rot ? ' Correction ajoutée : ' + fmt(state.config.rot, 0) + '°.' : '');
+      })() + ' Les calculs (volumes, marges) n\'utilisent pas les positions.</div>');
   }
   if (!placed && trees.length) notice.insertAdjacentHTML("beforeend", enPlein()
     ? '<div class="note info">Inventaire en plein : les arbres ne sont pas placés un par un, le GPS n\'est pas assez précis pour cela. ' + (state.config.refZone ? 'Pour la zone de référence, chaque arbre est rattaché à son carré : voir le plan ci-dessous.' : '') + '</div>'
@@ -4033,7 +4080,8 @@ function fcPlots() {
           nb_arbres: p.souches, nb_tiges: p.n, rayon_reduit: clean(p.raw.radius_reduced) === "1", somme_g_m2: rnd(p.sumG, 6), somme_v_m3: rnd(p.sumV, 4),
           G_m2_ha: rnd(p.gHa, 3), V_m3_ha: rnd(p.vHa, 2), tiges_ha: rnd(p.nHa, 1),
           centre_lat: rnd(p.lat, 8), centre_lon: rnd(p.lon, 8), centre_source: p.centreSrc === "plan" ? "plan" : "arboreal",
-          centre_arboreal_lat: rnd(p.latArb, 8), centre_arboreal_lon: rnd(p.lonArb, 8)
+          centre_arboreal_lat: rnd(p.latArb, 8), centre_arboreal_lon: rnd(p.lonArb, 8),
+          rotation_deg: state.config.posMode === "gps" ? null : rnd((state.config.rot || 0) + (state.config.rotAuto !== false ? plotRotAuto(p).deg || 0 : 0), 1)
         }
       };
     })
@@ -7041,6 +7089,7 @@ function wire() {
 
   // carte
   $("#posMode").addEventListener("change", e => { state.config.posMode = e.target.value; renderMap(); persist(); });
+  $("#rotAuto").addEventListener("change", e => { state.config.rotAuto = e.target.value === "1"; renderMap(); persist(); });
   $("#rotDeg").addEventListener("change", e => { state.config.rot = num(e.target.value) || 0; renderMap(); persist(); });
   $("#baseMap").addEventListener("change", e => { state.config.baseMap = e.target.value; renderMap(); persist(); });
   $("#colorBy").addEventListener("change", e => { state.config.colorBy = e.target.value; renderMap(); renderPlan(); persist(); });
@@ -7060,6 +7109,7 @@ function init() {
   const had = restore();
   $("#posMode").value = state.config.posMode;
   $("#rotDeg").value = state.config.rot;
+  $("#rotAuto").value = state.config.rotAuto !== false ? "1" : "0";
   $("#baseMap").value = state.config.baseMap;
   $("#colorBy").value = state.config.colorBy;
   // façon de mesurer : déduite des sorties déjà enregistrées si elle n'a pas encore été choisie
