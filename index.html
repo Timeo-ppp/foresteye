@@ -1050,7 +1050,6 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <span class="eyebrow">Étape 1</span>
     <h2>Préparer la sortie</h2>
     <p>Délimitez la forêt, laissez l'application répartir les placettes, puis suivez le guidage jusqu'au centre de chacune. Le plan se garde d'une campagne à l'autre.</p>
-    <p class="hint" id="exampleLink"></p>
   </div>
 
   <div id="plBody" class="panel"></div>
@@ -1548,7 +1547,6 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div class="page-head">
     <h2>Comprendre les résultats</h2>
     <p>Le vocabulaire forestier et statistique employé dans l'application, en clair.</p>
-    <p class="hint" id="exampleLinkHelp"></p>
   </div>
 
   <div class="card">
@@ -2869,7 +2867,7 @@ function renderDemoBanner() {
   ["#exampleLink", "#exampleLinkHelp"].forEach(id => {
     const x = $(id); if (!x) return;
     x.innerHTML = "";
-    if (!isDemo()) x.append(el("button", { class: "linkbtn", type: "button", text: "Voir l'exemple fictif", onclick: askDemo }), document.createTextNode(" (23 arbres inventés sur un contour réel, en 5 placettes)"));
+    // lien « Voir l'exemple fictif » retiré le 06/11/2026 ; le bandeau reste pour quitter un exemple déjà ouvert
   });
   if (!isDemo()) return;
   b.appendChild(el("div", { class: "note warn demo-banner" }, [
@@ -3514,8 +3512,7 @@ function renderResult() {
     g.appendChild(el("div", { class: "empty" }, [
       el("p", { style: "margin:0 0 10px", text: plein
         ? "Aucun arbre compté pour l'instant. Comptez tous les arbres de la zone dans 2 · Mesurer : le résultat s'affichera ici."
-        : "Aucune placette mesurée pour l'instant. Préparez la sortie (étape 1), puis mesurez les placettes (étape 2) : le résultat s'affichera ici." }),
-      el("button", { class: "linkbtn", type: "button", text: "Voir l'exemple fictif (23 arbres inventés sur un contour réel)", onclick: askDemo })
+        : "Aucune placette mesurée pour l'instant. Préparez la sortie (étape 1), puis mesurez les placettes (étape 2) : le résultat s'affichera ici." })
     ]));
     return;
   }
