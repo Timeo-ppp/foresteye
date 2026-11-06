@@ -1469,8 +1469,9 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <div class="maptools">
       <label class="f">Position des arbres
         <select id="posMode">
-          <option value="gps">GPS individuel (trees.csv)</option>
-          <option value="local">Repère local de la placette</option>
+          <option value="plan">Centre du plan + position relative (recommandé)</option>
+          <option value="local">Centre Arboreal + position relative</option>
+          <option value="gps">GPS de chaque arbre (imprécis sous couvert)</option>
         </select>
       </label>
       <label class="f" id="rotWrap" hidden>Orientation du repère
@@ -1904,7 +1905,7 @@ const SERIES = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6", "--s7", "--s8"];
 
 /* réglages par défaut ; un projet ancien sans ces clés les reçoit à l'ouverture */
 const CONFIG_DEFAULT = {
-  conf: 0.90, threshold: 10, areaMode: "real", posMode: "gps", rot: 0, baseMap: "ign", colorBy: "species", heightMode: "courbe", voie: "", fpc: true,
+  conf: 0.90, threshold: 10, areaMode: "real", posMode: "plan", posModeV2: true, rot: 0, baseMap: "ign", colorBy: "species", heightMode: "courbe", voie: "", fpc: true,
   methode: "auto",        // "auto" (selon la surface), "placettes" ou "plein" (inventaire en plein)
   seuilPleinHa: 1,        // en dessous : inventaire en plein conseillé
   seuilGrandHa: 20,       // au-dessus : placettes, avec avertissement sur les journées de terrain
@@ -2236,11 +2237,19 @@ function allPlots() {
       label: state.plotLabels[id] || id,
       area, edge: plotEdge(s),
       radius: num(s.sample_radius) || Math.sqrt(plotAreaBase(s) / Math.PI),
-      lat: num(s.latitude), lon: num(s.longitude),
+      ...centrePlacette(s, ss),
       acc: num(s.gps_stamp_horizontal_accuracy)
     });
   }));
   return out;
+}
+/* centre d'une placette importée : en mode « plan », le centre prévu du plan (rejoint avec le guidage
+   GPS du téléphone, plus fiable que le GPS d'Arboreal sous couvert) ; sinon le centre relevé par Arboreal */
+function centrePlacette(s, ss) {
+  const latArb = num(s.latitude), lonArb = num(s.longitude);
+  const q = planPointById(clean(s.plan_id));
+  const usePlan = state.config.posMode === "plan" && q && !(ss && ss.field);
+  return usePlan ? { lat: q.lat, lon: q.lon, latArb, lonArb, centreSrc: "plan" } : { lat: latArb, lon: lonArb, latArb, lonArb, centreSrc: "arboreal" };
 }
 /* arbres (tiges) comptés : 7,5 cm de diamètre et plus. Les tiges sous le seuil sont gardées dans
    le projet mais n'entrent dans aucun calcul, tableau ni export ; excludedStems() les liste. */
@@ -3731,7 +3740,7 @@ function diamColor(D) {
 }
 function renderMap() {
   const notice = $("#mapNotice"); notice.innerHTML = "";
-  $("#rotWrap").hidden = state.config.posMode !== "local";
+  $("#rotWrap").hidden = state.config.posMode === "gps";
   const holder = $("#map");
   if (typeof L === "undefined") {
     holder.innerHTML = '<div class="empty" style="height:100%; display:flex; align-items:center; justify-content:center">La librairie de carte n\'a pas pu être chargée (pas de connexion ?). Le plan de placette ci-dessous fonctionne hors connexion.</div>';
@@ -3815,9 +3824,14 @@ function renderMap() {
       '<p>Précision médiane annoncée : ± ' + fmt(medAcc, 1) + ' m, pour un rayon de placette de ' + fmt(medR, 1) + ' m. Sous couvert forestier, c\'est normal. Les arbres apparaissent donc dispersés bien au-delà du cercle réel.</p>' +
       '<p>Le mode <b>repère local de la placette</b> utilise les coordonnées relatives relevées par l\'application terrain (précision centimétrique) et replace chaque arbre au bon endroit dans le cercle. Il faut alors renseigner l\'orientation du repère.</p></div>');
   }
-  if (state.config.posMode === "local") {
-    notice.insertAdjacentHTML("beforeend", '<div class="note info">Les arbres sont placés à partir de leurs coordonnées relatives au centre de la placette. ' +
-      'L\'export ne contient pas l\'orientation du repère : ajustez l\'azimut jusqu\'à ce que le nuage corresponde au terrain. <b>À valider avec l\'équipe avant tout usage officiel.</b></div>');
+  if (state.config.posMode !== "gps") {
+    const nPlan = plots.filter(p => p.centreSrc === "plan").length, nArb = plots.filter(p => !p.raw.field && p.centreSrc !== "plan").length;
+    const ecarts = plots.filter(p => p.centreSrc === "plan" && isFinite(p.latArb)).map(p => plDistBearing([p.latArb, p.lonArb], [p.lat, p.lon]).d).sort((a, b) => a - b);
+    notice.insertAdjacentHTML("beforeend", '<div class="note info">Chaque arbre est placé à partir de sa position relative au centre de la placette, mesurée par Arboreal (au centimètre), et non de son GPS. ' +
+      (state.config.posMode === "plan"
+        ? 'Centre utilisé : <b>le centre prévu du plan</b>, rejoint avec le guidage GPS' + (nPlan ? ' (' + nPlan + ' placette' + (nPlan > 1 ? 's' : '') + (ecarts.length ? ' ; écart médian avec le centre relevé par Arboreal : ' + fmt(ecarts[Math.floor(ecarts.length / 2)], 0) + ' m, au plus ' + fmt(ecarts[ecarts.length - 1], 0) + ' m' : '') + ')' : '') + '.' + (nArb ? ' ' + nArb + ' placette' + (nArb > 1 ? 's' : '') + ' non rattachée' + (nArb > 1 ? 's' : '') + ' au plan : centre Arboreal.' : '')
+        : 'Centre utilisé : le centre relevé par Arboreal.') +
+      ' L\'export Arboreal ne donne pas l\'orientation du repère : si le nuage d\'arbres semble tourné, ajustez l\'azimut. Les calculs (volumes, marges) n\'utilisent pas les positions.</div>');
   }
   if (!placed && trees.length) notice.insertAdjacentHTML("beforeend", enPlein()
     ? '<div class="note info">Inventaire en plein : les arbres ne sont pas placés un par un, le GPS n\'est pas assez précis pour cela. ' + (state.config.refZone ? 'Pour la zone de référence, chaque arbre est rattaché à son carré : voir le plan ci-dessous.' : '') + '</div>'
@@ -3995,7 +4009,7 @@ function fcTrees() {
           diametre_cm: rnd(t.D, 2), hauteur_m: rnd(t.H, 2), g_m2: rnd(t.g, 6), coef_forme: t.f, volume_m3: rnd(t.V, 4),
           volume_type: "bois fort tige, jusqu'à 7 cm de diamètre", volume_indicatif: !!t.indicatif,
           hauteur_type: t.hSrc, hauteur_origine: HSRC_LABEL[t.hSrc] || "",
-          gps_precision_m: rnd(t.acc, 2), position: state.config.posMode === "local" ? "repere_local" : "gps"
+          gps_precision_m: rnd(t.acc, 2), position: state.config.posMode === "gps" ? "gps" : (t.plot && t.plot.centreSrc === "plan" ? "centre_plan_relatif" : "centre_arboreal_relatif")
         }
       };
     }).filter(Boolean)
@@ -4018,7 +4032,8 @@ function fcPlots() {
           surface_utile_m2: rnd(p.area, 3), part_dans_foret_pct: p.edge && p.edge.known && !p.edge.full ? rnd(p.edge.share * 100, 1) : 100, rayon_m: rnd(p.radius, 3),
           nb_arbres: p.souches, nb_tiges: p.n, rayon_reduit: clean(p.raw.radius_reduced) === "1", somme_g_m2: rnd(p.sumG, 6), somme_v_m3: rnd(p.sumV, 4),
           G_m2_ha: rnd(p.gHa, 3), V_m3_ha: rnd(p.vHa, 2), tiges_ha: rnd(p.nHa, 1),
-          centre_lat: rnd(p.lat, 8), centre_lon: rnd(p.lon, 8)
+          centre_lat: rnd(p.lat, 8), centre_lon: rnd(p.lon, 8), centre_source: p.centreSrc === "plan" ? "plan" : "arboreal",
+          centre_arboreal_lat: rnd(p.latArb, 8), centre_arboreal_lon: rnd(p.lonArb, 8)
         }
       };
     })
@@ -4120,6 +4135,7 @@ function loadProject(j, quiet) {
   state.plotLabels = j.plotLabels || {};
   state.config = Object.assign({}, CONFIG_DEFAULT, j.config || {});
   state.config.refZone = false;   // zone de référence 50 × 50 m abandonnée le 06/11/2026
+  if (!(j.config && j.config.posModeV2)) { state.config.posMode = "plan"; state.config.posModeV2 = true; }   // 06/11/2026 : centre du plan par défaut
   state.field = Object.assign({}, FIELD_DEFAULT, j.field || {});
   state.plan = Object.assign(JSON.parse(JSON.stringify(PLAN_DEFAULT)), j.plan || {});
   CURVES_CACHE = null;
