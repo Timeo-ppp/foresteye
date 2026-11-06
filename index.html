@@ -5809,6 +5809,24 @@ function plAddExtra(k) {
    l'incertitude relative sur l'écart-type vaut environ 1 / √(2(n-1)), soit ± 70 % à 2 placettes,
    ± 35 % à 5, ± 24 % à 10 ; 5 = échantillon pilote, encore tôt dans la campagne. */
 function nPilote() { const v = parseInt(state.config.nPilote, 10); return v >= 2 && v <= 30 ? v : 5; }
+/* placette déjà mesurée (aujourd'hui ou lors d'une sortie précédente) */
+function plMesuree(q) { const st = plStatus(q); return !!(st.now || st.before.length); }
+/* retire k placettes non mesurées : à chaque fois la plus redondante, c'est-à-dire la plus proche
+   d'une autre placette du plan ; les placettes mesurées ne sont jamais retirées */
+function plRemoveExtra(k) {
+  const plan = state.plan, retirees = [];
+  for (let i = 0; i < k; i++) {
+    const libres = plan.points.filter(q => !plMesuree(q));
+    if (!libres.length || plan.points.length <= 2) break;
+    let pire = null;
+    libres.forEach(q => {
+      const d = plan.points.reduce((m, o) => o === q ? m : Math.min(m, plDistBearing([q.lat, q.lon], [o.lat, o.lon]).d), Infinity);
+      if (!pire || d < pire.d - 0.01 || (Math.abs(d - pire.d) <= 0.01 && q.num > pire.q.num)) pire = { q, d };
+    });
+    plan.points = plan.points.filter(x => x !== pire.q); retirees.push(pire.q.num);
+  }
+  return retirees.sort((a, b) => a - b);
+}
 function blocCompleter(e) {
   const plan = state.plan, nPlan = plan.points.length;
   if (!e || !e.m || !nPlan) return null;
@@ -5831,7 +5849,29 @@ function blocCompleter(e) {
   lignes.push("Pour ± " + fmt(th, 0) + " % : <b>" + eGoal + " placettes</b> au total ; le plan en compte " + nPlan + ".");
   box.appendChild(el("p", { style: "margin:0", html: lignes.join(" ") }));
   const manque = isFinite(eGoal) ? Math.max(0, eGoal - nPlan) : 0;
-  if (!manque) { box.appendChild(el("div", { class: "note ok", text: "Le plan contient assez de placettes pour atteindre l'objectif, si la variabilité se confirme sur les placettes restantes." })); return box; }
+  if (!manque) {
+    const nMes = plan.points.filter(plMesuree).length, nLibres = nPlan - nMes;
+    const cible = isFinite(eGoal) ? Math.max(eGoal, nMes, 2) : nPlan, enTrop = Math.min(nPlan - cible, nLibres);
+    if (!(enTrop > 0)) { box.appendChild(el("div", { class: "note ok", text: "Le plan contient le nombre de placettes nécessaire pour atteindre l'objectif, si la variabilité se confirme sur les placettes restantes." })); return box; }
+    box.appendChild(el("div", { class: "note ok", html: "Le plan contient <b>" + (nPlan - cible) + " placette" + (nPlan - cible > 1 ? "s" : "") + " de plus</b> que nécessaire pour ± " + fmt(th, 0) + " %." + (nMes > cible ? " Toutes celles qui restent ne sont pas indispensables, mais " + nMes + " sont déjà mesurées." : "") }));
+    const rIn = el("input", { id: "plRmK", type: "number", min: "1", max: String(nLibres), step: "1", value: String(enTrop), style: "width:70px", "aria-label": "Placettes à retirer" });
+    const prevR = el("span", { class: "hint" });
+    const majR = () => { const k = Math.min(nLibres, Math.max(0, parseInt(rIn.value, 10) || 0)), n = nPlan - k; prevR.textContent = "→ " + n + " placettes, marge attendue ± " + fmt(margeAttendue(e.m.cv, n, Npop), 1) + " %"; };
+    rIn.addEventListener("input", majR); majR();
+    box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px; flex-wrap:wrap" }, [el("span", { text: "Retirer" }), rIn, el("span", { text: "placettes non mesurées" }), prevR]));
+    box.appendChild(el("div", { class: "pl-tools" }, [el("button", { class: "btn", type: "button", text: "Retirer du plan", onclick: () => {
+      const k = parseInt(rIn.value, 10);
+      if (!(k >= 1 && k <= nLibres)) return toast("Entre 1 et " + nLibres + " placettes");
+      const nums = plRemoveExtra(k);
+      if (!nums.length) return toast("Aucune placette non mesurée à retirer");
+      plan.retraits = (plan.retraits || []).concat([{ at: new Date().toISOString(), nums, cv: e.m.cv, base: e.m.base, objectif: th }]);
+      const e1 = plotEstimate(); if (e1 && e1.best) plan.est0 = { n: e1.best.n, cv: e.m.cv, measured: true, at: new Date().toISOString() };
+      PL.fitKey = ""; renderAll();
+      toast("Retirée" + (nums.length > 1 ? "s" : "") + " du plan : n° " + nums.join(", "), 5000);
+    } })]));
+    box.appendChild(el("p", { class: "hint", style: "margin:0", text: "Seules les placettes pas encore mesurées sont retirées, en commençant par les plus proches d'une autre (là où la forêt est le plus couverte). Les autres gardent leur numéro. Moins de placettes, c'est une marge plus grande si la variabilité réelle est plus forte que celle mesurée : gardez-en une ou deux de marge en cas de doute." }));
+    return box;
+  }
   const kIn = el("input", { id: "plAddK", type: "number", min: "1", max: "200", step: "1", value: String(manque), style: "width:70px", "aria-label": "Placettes à ajouter" });
   const prev = el("span", { class: "hint" });
   const maj = () => { const k = Math.max(0, parseInt(kIn.value, 10) || 0), n = nPlan + k; prev.textContent = "→ " + n + " placettes, marge attendue ± " + fmt(margeAttendue(e.m.cv, n, Npop), 1) + " %"; };
