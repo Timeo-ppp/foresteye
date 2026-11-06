@@ -1070,19 +1070,19 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div class="page-head">
     <span class="eyebrow">Étape 2</span>
     <h2>Mesurer les placettes</h2>
-    <p>La saisie gratuite dans ForestEye est la méthode de référence. Arboreal Forest est une option payante, facultative, pour aller plus vite. Les deux donnent les mêmes calculs, la même carte et les mêmes exports.</p>
+    <p>Arboreal Forest est la méthode de référence : plus rapide, plus facile et plus intuitive. La saisie manuelle dans ForestEye (ruban, clinomètre) sert de contrôle, ou de solution sans abonnement. Les deux donnent les mêmes calculs, la même carte et les mêmes exports.</p>
   </div>
 
   <div class="voies" role="group" aria-label="Façon de mesurer">
-    <button class="voie" type="button" data-voie="foresteye" aria-pressed="false">
-      <i class="voie-tag ok">Recommandée - gratuite</i>
-      <b>Avec ForestEye</b>
-      <span>Ruban ou compas forestier, décamètre, clinomètre ou téléphone. Chaque arbre est saisi directement ici, placette par placette. Aucun abonnement : c'est la méthode de référence.</span>
-    </button>
     <button class="voie" type="button" data-voie="arboreal" aria-pressed="false">
-      <i class="voie-tag">Option payante pour aller plus vite (abonnement court)</i>
+      <i class="voie-tag ok">Recommandée - méthode de référence</i>
       <b>Avec Arboreal Forest</b>
-      <span>Diamètres et positions mesurés en réalité augmentée, puis importés ici. Une semaine d'abonnement suffit pour une campagne (tarif sur l'App Store). Un iPhone avec capteur LiDAR donne les diamètres les plus précis.</span>
+      <span>Diamètres, hauteur et positions mesurés en réalité augmentée, puis importés ici. Une semaine d'abonnement suffit pour une campagne (tarif sur l'App Store). Un iPhone avec capteur LiDAR donne les diamètres les plus précis.</span>
+    </button>
+    <button class="voie" type="button" data-voie="foresteye" aria-pressed="false">
+      <i class="voie-tag">Contrôle ou sans abonnement</i>
+      <b>Saisie manuelle dans ForestEye</b>
+      <span>Ruban ou compas forestier, décamètre, clinomètre ou téléphone. Chaque arbre est saisi directement ici, placette par placette. Sert à contrôler quelques arbres mesurés par Arboreal, ou à tout mesurer sans abonnement.</span>
     </button>
   </div>
 
@@ -1098,7 +1098,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <div id="arbImport" class="panel">
       <div class="note info">
         <b>Sur le terrain avec Arboreal</b>
-        <p>Rejoignez chaque placette avec le guidage de l'étape 1, puis mesurez-la dans Arboreal. Nommez-la dans Arboreal avec son numéro du plan si possible. En lisière, ne mesurez que les arbres côté forêt. Arboreal ne mesure qu'une hauteur par placette : à l'étape b, mesurez au clinomètre la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne.</p>
+        <p>Rejoignez chaque placette avec le guidage de l'étape 1, puis mesurez-la dans Arboreal. Nommez-la dans Arboreal avec son numéro du plan si possible. En lisière, ne mesurez que les arbres côté forêt. Arboreal mesure une hauteur par placette. Dans une plantation homogène (même essence, même âge), cette hauteur suffit : c'est le choix fait à La Tremblade, à citer comme limite. Dans un peuplement mélangé ou irrégulier, complétez à l'étape b la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne.</p>
       </div>
       <div class="drop" id="drop">
         <h3>Déposez les fichiers exportés par Arboreal</h3>
@@ -1139,7 +1139,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <div><dt>Azimut</dt><dd>Direction de l'arbre vue depuis le centre de la placette, en degrés depuis le nord (90 = est). Avec le téléphone : tenez-le à plat, bord supérieur pointé vers l'arbre, loin de tout objet métallique. La déclinaison magnétique, de l'ordre d'un degré en Charente-Maritime, est négligeable à l'échelle d'une placette.</dd></div>
         <div><dt>Tronc</dt><dd>À 1,30 m du sol, côté amont si le terrain est en pente. Au ruban, saisissez la circonférence : l'application la convertit en diamètre (D = C / π). Au compas forestier, saisissez directement le diamètre.</dd></div>
         <div><dt>Hauteur au clinomètre</dt><dd>Placez-vous là où le sommet et le pied sont visibles, mesurez la distance horizontale jusqu'au tronc, puis visez le sommet et le pied. <span class="formula">H = L × (tan αsommet - tan αpied)</span>. L'angle vers le pied est négatif quand on regarde vers le bas. Pas besoin de reculer loin : à une distance égale à la moitié de la hauteur (angle d'environ 63°), l'erreur n'est que 15 % plus forte qu'à 45°. Au-delà de 70°, reculez.</dd></div>
-        <div><dt>Combien de hauteurs mesurer ?</dt><dd>Le diamètre se mesure sur tous les arbres, la hauteur sur 2 à 3 arbres par placette, de grosseurs différentes (un fin, un moyen, un gros), choisis là où le sommet est visible. Sur la campagne, visez au moins 12 à 15 hauteurs par essence. L'application ajuste une courbe hauteur-diamètre par essence et estime la hauteur des autres arbres à partir de leur diamètre ; sous 12 hauteurs mesurées, elle signale que la courbe est peu fiable. Avec Arboreal, c'est l'étape « b · Compléter les hauteurs ».</dd></div>
+        <div><dt>Combien de hauteurs mesurer ?</dt><dd>Le diamètre se mesure sur tous les arbres, la hauteur sur 2 à 3 arbres par placette, de grosseurs différentes (un fin, un moyen, un gros), choisis là où le sommet est visible. Sur la campagne, visez au moins 12 à 15 hauteurs par essence. L'application ajuste une courbe hauteur-diamètre par essence et estime la hauteur des autres arbres à partir de leur diamètre ; sous 12 hauteurs mesurées, elle signale que la courbe est peu fiable. Avec Arboreal, c'est l'étape « b · Compléter les hauteurs ». Exception : dans une plantation homogène, la hauteur unique mesurée par Arboreal sur chaque placette suffit (limite à signaler).</dd></div>
       </dl>
     </div>
   </details>
@@ -1267,7 +1267,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <input type="number" id="cfgSeuilGrand" min="1" step="1" style="width:120px">
       </label>
     </div>
-    <label class="pl-chk" style="margin-top:12px"><input type="checkbox" id="cfgRefZone"> Zone de référence de 50 × 50 m (inventaire en plein, carrés A1 à E5)</label>
+    <!-- zone de référence 50 × 50 m retirée le 06/11/2026 (validation par comptage des lignes et comparaison physique / Arboreal) -->
+    <input type="checkbox" id="cfgRefZone" hidden>
     <p class="hint" style="margin:10px 0 0">Par défaut : moins de 1 ha, compter tous les arbres ; de 1 à 20 ha, placettes ; au-delà de 20 ha, placettes avec un avertissement sur le nombre de journées de terrain. Dès la première mesure, la méthode en cours est gardée : vous pouvez toujours choisir l'autre ici ou dans 1 · Préparer.</p>
   </div>
 
@@ -1526,13 +1527,6 @@ input.fx-big{font-size:18px; padding:10px 12px}
       </div>
     </div>
     <div class="card">
-      <h3 class="blk">Zone de référence (validation)</h3>
-      <p class="hint" style="margin-top:4px">Inventaire en plein de la zone de 50 × 50 m : une ligne par tige, avec son carré (A1 à E5). Colonnes : arbre, tige, carré, essence, D_cm, H_m, origine_hauteur, f, g_m2, v_m3. Ce fichier est lu par le script de validation (dossier validation/), séparé de l'application.</p>
-      <div class="row" style="margin-top:14px">
-        <button class="btn" data-exp="csv-refzone" type="button">Zone de référence (CSV)</button>
-      </div>
-    </div>
-    <div class="card">
       <h3 class="blk">Projet complet</h3>
       <p class="hint" style="margin-top:4px">Toutes les sorties, la parcelle, le plan de placettes, les essences et les réglages dans un seul fichier, à rouvrir plus tard ou à partager avec l'équipe.</p>
       <div class="row" style="margin-top:14px">
@@ -1559,8 +1553,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div class="card">
     <h3 class="blk">Deux façons de mesurer</h3>
     <dl class="gloss" style="margin-top:14px">
-      <div><dt>Avec ForestEye : la méthode de référence, gratuite</dt><dd>On saisit chaque arbre dans 2 · Mesurer : essence, circonférence au ruban (ou diamètre au compas), distance et direction depuis le centre de la placette, hauteur au clinomètre pour quelques arbres. Le matériel suffit : ruban, décamètre, clinomètre ou téléphone. Aucun abonnement.</dd></div>
-      <div><dt>Avec Arboreal Forest : une option payante, facultative</dt><dd>Pour aller plus vite. L'application Arboreal mesure le diamètre et la position des arbres en réalité augmentée. Elle demande un abonnement payant de courte durée : une semaine suffit pour une campagne (tarif à vérifier sur l'App Store). Les diamètres sont plus précis avec un iPhone équipé d'un capteur LiDAR. Les fichiers exportés s'importent dans 2 · Mesurer, puis on complète les hauteurs au clinomètre.</dd></div>
+      <div><dt>Saisie manuelle dans ForestEye : le contrôle, sans abonnement</dt><dd>Sert à contrôler les mesures d'Arboreal sur quelques arbres, ou à tout mesurer sans abonnement. On saisit chaque arbre dans 2 · Mesurer : essence, circonférence au ruban (ou diamètre au compas), distance et direction depuis le centre de la placette, hauteur au clinomètre pour quelques arbres. Le matériel suffit : ruban, décamètre, clinomètre ou téléphone. Aucun abonnement.</dd></div>
+      <div><dt>Avec Arboreal Forest : la méthode de référence</dt><dd>Plus rapide, plus facile et plus intuitive. L'application Arboreal mesure le diamètre et la position des arbres en réalité augmentée. Elle demande un abonnement payant de courte durée : une semaine suffit pour une campagne (tarif à vérifier sur l'App Store). Les diamètres sont plus précis avec un iPhone équipé d'un capteur LiDAR. Les fichiers exportés s'importent dans 2 · Mesurer, puis on complète les hauteurs au clinomètre.</dd></div>
     </dl>
   </div>
 
@@ -1588,7 +1582,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <div><dt>Objectif de précision</dt><dd>Par défaut, une marge de ± 10 % au plus, avec 90 % de confiance : « ± 10 % (confiance 90 %) ». Les deux chiffres se règlent dans Réglages. Une marge de ± 10 % ne veut pas dire « fiable à 90 % » : elle dit de combien le résultat peut s'écarter de la vraie valeur.</dd></div>
         <div><dt>Combien de placettes ?</dt><dd>L'étape 1 · Préparer l'estime dès que la forêt est délimitée : <span class="formula">n = (t × CV / E)²</span>, CV étant la variabilité du volume entre placettes et E la marge visée. Avant toute mesure, CV est une hypothèse (50 % par défaut) ; dès 2 placettes mesurées, la variabilité réelle la remplace et l'application signale si l'estimation change. Sur une petite forêt, le nombre est corrigé par <span class="formula">n / (1 + n / N)</span>, N étant le nombre de placettes que contient la forêt.</dd></div>
         <div><dt>Comment réduire la marge ?</dt><dd>Ajouter des placettes : la marge décroît comme 1/√n. L'étape 1 · Préparer calcule le nombre de placettes nécessaire dès que deux placettes sont mesurées. Séparer les essences ne rend pas le total plus précis. Si la forêt a des zones nettement différentes (une peupleraie et une chênaie, par exemple), on peut en faire deux inventaires séparés, un par zone.</dd></div>
-        <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse ; la Synthèse compare la saisie gratuite et Arboreal.</dd></div>
+        <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse ; la Synthèse compare Arboreal et la saisie manuelle.</dd></div>
       </dl>
     </div>
   </div>
@@ -2902,7 +2896,7 @@ function renderImport(report) {
   const wrap = $("#sessions");
   wrap.innerHTML = "";
   if (!state.sessions.length) {
-    wrap.appendChild(el("div", { class: "empty", text: "Aucune sortie pour l'instant. Mesurez avec ForestEye (saisie gratuite, méthode de référence) ou, en option, importez les fichiers d'Arboreal Forest." }));
+    wrap.appendChild(el("div", { class: "empty", text: "Aucune sortie pour l'instant. Importez les fichiers d'Arboreal Forest (méthode de référence) ou saisissez les arbres à la main dans ForestEye." }));
     return;
   }
   const dupN = plDupNote(); if (dupN) wrap.appendChild(dupN);
@@ -3187,8 +3181,8 @@ function renderTrees() {
   const estN = trees.filter(t => t.hSrc === "courbe" || t.hSrc === "moyenne").length;
   if (estN) hw.appendChild(el("div", { class: "note info", style: "margin-bottom:10px", html: "<b>" + estN + " hauteur(s) estimée(s) par la courbe de hauteur</b> à partir de " + trees.filter(t => t.hSrc === "mesuree").length + " arbre(s) mesuré(s). Détail de la courbe sous le tableau." }));
   if (sharedN) hw.appendChild(el("div", {
-    class: "note warn",
-    html: "<b>" + sharedN + " arbres portent une hauteur identique.</b> L'application terrain n'a mesuré qu'une hauteur représentative pour la placette et l'a recopiée sur tous les arbres. Les volumes restent calculables, mais la variabilité réelle des hauteurs est inconnue : ne présentez pas ces volumes comme mesurés arbre par arbre."
+    class: "note info",
+    html: "<b>Une hauteur par placette pour " + sharedN + " arbres.</b> Arboreal mesure une hauteur représentative de la placette et la reporte sur tous ses arbres. C'est adapté à une plantation homogène (même essence, même âge) : les volumes sont valables, avec cette limite à signaler, la variation des hauteurs à l'intérieur d'une placette n'est pas mesurée. Dans un peuplement mélangé, complétez quelques hauteurs (2 · Mesurer, Arboreal, étape b)."
   }));
 
   const tb = $("#tblTrees tbody"); tb.innerHTML = "";
@@ -3278,7 +3272,7 @@ function renderSynthese() {
   renderDiamChart();
   renderDurees();
 }
-/* durées réelles de mesure, par voie (D13 : comparer la saisie gratuite et Arboreal) */
+/* durées réelles de mesure, par voie (comparer Arboreal et la saisie manuelle) */
 function renderDurees() {
   const box = $("#dureesBox"); if (!box) return;
   box.innerHTML = "";
@@ -3286,7 +3280,7 @@ function renderDurees() {
   const pv = dureesParVoie();
   const card = el("div", { class: "card" });
   card.appendChild(el("h3", { class: "blk", text: "Temps de mesure par placette" }));
-  card.appendChild(el("p", { class: "hint", style: "margin:4px 0 12px", text: "D'après les horodatages : de l'ouverture de la placette (ou du premier arbre) au dernier arbre saisi, sans la marche entre placettes. Sert à comparer la saisie gratuite et Arboreal, et à ajuster l'estimation du temps de terrain (Réglages)." }));
+  card.appendChild(el("p", { class: "hint", style: "margin:4px 0 12px", text: "D'après les horodatages : de l'ouverture de la placette (ou du premier arbre) au dernier arbre saisi, sans la marche entre placettes. Sert à comparer la saisie manuelle et Arboreal, et à ajuster l'estimation du temps de terrain (Réglages)." }));
   const tw = el("div", { class: "tbl-wrap" }), t = el("table");
   t.innerHTML = "<thead><tr><th>Façon de mesurer</th><th class='num'>Placettes</th><th class='num'>Durée moyenne (min)</th><th class='num'>Plus courte</th><th class='num'>Plus longue</th></tr></thead>";
   const b = el("tbody");
@@ -4111,6 +4105,7 @@ function loadProject(j, quiet) {
   state.mapping = j.mapping || {};
   state.plotLabels = j.plotLabels || {};
   state.config = Object.assign({}, CONFIG_DEFAULT, j.config || {});
+  state.config.refZone = false;   // zone de référence 50 × 50 m abandonnée le 06/11/2026
   state.field = Object.assign({}, FIELD_DEFAULT, j.field || {});
   state.plan = Object.assign(JSON.parse(JSON.stringify(PLAN_DEFAULT)), j.plan || {});
   CURVES_CACHE = null;
@@ -4238,17 +4233,13 @@ function renderMethodHelp() {
   box.appendChild(el("dl", { class: "gloss" }, [
     el("div", null, [el("dt", { text: "Moins de " + f1(sp) + " ha : comptez tous les arbres" }), el("dd", { text: "Inventaire en plein : chaque arbre de la zone est mesuré. Les totaux sont des sommes : pas de tirage de placettes, pas d'extrapolation, donc pas d'erreur d'échantillonnage." })]),
     el("div", null, [el("dt", { text: "De " + f1(sp) + " à " + f1(sg) + " ha : mesurez des placettes" }), el("dd", { text: "Des cercles de forêt répartis sur une grille au hasard, où l'on mesure tous les arbres. Le résultat est extrapolé à toute la forêt, avec sa marge d'erreur." })]),
-    el("div", null, [el("dt", { text: "Plus de " + f1(sg) + " ha : placettes, sur plusieurs journées" }), el("dd", { text: "Même méthode, mais le nombre de placettes et la marche entre elles demandent plusieurs journées de terrain : l'application en donne une estimation avant la sortie." })]),
-    el("div", null, [el("dt", { text: "Zone de référence de 50 × 50 m (validation)" }), el("dd", null, [
-      document.createTextNode("Pour valider la méthode, une zone de 0,25 ha est comptée en plein, carré par carré, puis comparée aux placettes par un script séparé de l'application (dossier validation/). Les 25 carrés de 10 × 10 m sont nommés A1 à E5 : A à E d'ouest en est, 1 à 5 du sud au nord. Ils sont délimités temporairement au décamètre ou à la ficelle, sans trace. Le carré de chaque arbre est noté, car le GPS n'est pas assez précis pour placer les arbres."),
-      (() => { const f = el("div", { style: "margin-top:10px" }); f.innerHTML = refZoneSVG(null, { max: 260 }); return f; })()
-    ])])
+    el("div", null, [el("dt", { text: "Plus de " + f1(sg) + " ha : placettes, sur plusieurs journées" }), el("dd", { text: "Même méthode, mais le nombre de placettes et la marche entre elles demandent plusieurs journées de terrain : l'application en donne une estimation avant la sortie." })])
   ]));
 }
 function renderHelp() {
   const nc = $("#noteCoefsAide"); if (nc) nc.textContent = NOTE_COEFS;
   const steps = [
-    ["Lecture des mesures", "Avec ForestEye (méthode de référence) : chaque arbre est saisi dans 2 · Mesurer. Avec Arboreal (option) : samples.csv donne les placettes et leur surface, trees.csv chaque arbre ; les autres fichiers sont conservés pour la traçabilité."],
+    ["Lecture des mesures", "Avec Arboreal (méthode de référence) : samples.csv donne les placettes et leur surface, trees.csv chaque arbre ; les autres fichiers sont conservés pour la traçabilité. Avec la saisie manuelle (contrôle) : chaque arbre est saisi dans 2 · Mesurer."],
     ["Seuil et cépées", "Seules les tiges de 7,5 cm de diamètre et plus (circonférence 23,5 cm à 1,30 m) sont comptées. Une cépée compte autant de tiges qu'elle a de tiges d'au moins 7,5 cm, et un seul arbre (souche)."],
     ["Hauteurs", "Les hauteurs mesurées (2 à 3 par placette) sont gardées telles quelles. Les autres sont estimées par la courbe de hauteur de l'essence, H = a + b × ln(D), ajustée par moindres carrés sur les arbres mesurés ; sous 12 hauteurs mesurées, la courbe est signalée peu fiable."],
     ["Calcul par tige", "g = π × D² / 40000 puis V = g × H × f : volume bois fort tige, du sol jusqu'à une découpe de 7 cm de diamètre, avec le coefficient de forme publié de l'essence (onglet Essences). Le diamètre est en centimètres."],
@@ -4268,8 +4259,8 @@ function renderHelp() {
   box.appendChild(ol);
 
   $("#formatHelp").innerHTML =
-    "<p><b>Saisie ForestEye (méthode de référence)</b> : rien à importer. Les relevés saisis dans 2 · Mesurer sont enregistrés avec les mêmes colonnes que samples.csv et trees.csv, plus la distance et l'azimut de chaque arbre, la mesure brute du tronc et l'origine de la hauteur (clinomètre, saisie directe ou estimée).</p>" +
-    "<p><b>Arboreal Forest (option)</b> : l'application accepte les cinq fichiers exportés par Arboreal Forest. <b>samples.csv</b> et <b>trees.csv</b> suffisent à tous les calculs.</p>" +
+    "<p><b>Saisie manuelle ForestEye (contrôle)</b> : rien à importer. Les relevés saisis dans 2 · Mesurer sont enregistrés avec les mêmes colonnes que samples.csv et trees.csv, plus la distance et l'azimut de chaque arbre, la mesure brute du tronc et l'origine de la hauteur (clinomètre, saisie directe ou estimée).</p>" +
+    "<p><b>Arboreal Forest (méthode de référence)</b> : l'application accepte les cinq fichiers exportés par Arboreal Forest. <b>samples.csv</b> et <b>trees.csv</b> suffisent à tous les calculs.</p>" +
     "<ul><li><b>samples.csv</b> : une ligne par placette (identifiant, surface réellement mesurée, rayon, position du centre).</li>" +
     "<li><b>trees.csv</b> : une ligne par arbre (placette, essence, diamètre à 1,30 m en cm, hauteur en m, coordonnées locales et GPS).</li>" +
     "<li><b>stems.csv</b> : une ligne par tige. Conservé tel quel ; un arbre à plusieurs tiges n'est compté qu'une fois, à partir de trees.csv.</li>" +
@@ -4607,13 +4598,13 @@ function renderPreparer() {
   renderFxPlan(body);
 }
 function setVoie(v) { state.config.voie = v; renderMesurer(); persist(); }
-/* façon de mesurer en cours : celle choisie, sinon la saisie gratuite ForestEye (méthode de référence),
-   sauf pour un projet qui ne contient que des imports Arboreal */
+/* façon de mesurer en cours : celle choisie, sinon Arboreal (méthode de référence),
+   sauf pour un projet qui ne contient que des saisies manuelles */
 function voieActive() {
   const v = state.config.voie;
   if (v === "foresteye" || v === "arboreal") return v;
   const reel = state.sessions.filter(s => !s.demo);
-  return reel.length && reel.every(s => !s.field) ? "arboreal" : "foresteye";
+  return reel.length && reel.every(s => s.field) ? "foresteye" : "arboreal";
 }
 function renderMesurer() {
   const voie = voieActive(), arbStep = state.ui.arbStep || "import";
@@ -5750,7 +5741,7 @@ function dureesPlacettes() {
   });
   return out;
 }
-const VOIE_NOM = { foresteye: "Saisie ForestEye (gratuite)", arboreal: "Arboreal Forest (payant)" };
+const VOIE_NOM = { foresteye: "Saisie manuelle (contrôle)", arboreal: "Arboreal Forest (référence)" };
 function dureesParVoie() {
   const d = dureesPlacettes(), res = {};
   ["foresteye", "arboreal"].forEach(v => {
@@ -6401,12 +6392,6 @@ async function choisirMethode(v) {
 function pleinEtape() {
   const k = [], ref = !!state.config.refZone;
   k.push(el("p", { class: "hint", style: "margin:0", text: "Tous les arbres de la zone sont mesurés : pas de placettes à répartir, pas de guidage. Parcourez la zone méthodiquement, par bandes" + (ref ? " ou carré par carré" : "") + ", pour n'oublier aucun arbre et n'en compter aucun deux fois." }));
-  k.push(el("label", { class: "pl-chk" }, [
-    el("input", { type: "checkbox", checked: ref, onchange: e => { state.config.refZone = e.target.checked; renderAll(); } }),
-    document.createTextNode(" Zone de référence de 50 × 50 m (validation de la méthode)"),
-    aide("Zone de 0,25 ha comptée en plein, carré par carré, pour comparer ensuite les placettes au vrai total (script de validation séparé de l'application).")
-  ]));
-  if (ref) k.push(refZoneHelp());
   const A = pleinAire();
   k.push(el("div", { class: "pl-stats" }, [
     el("span", { class: "chip", text: A > 0 ? "zone de " + fmt(A, 0) + " m² (" + fmt(A / 10000, 2) + " ha)" : "surface de la zone inconnue" }),
