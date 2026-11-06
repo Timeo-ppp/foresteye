@@ -979,6 +979,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
 .nav-dist{font-family:"IBM Plex Mono",monospace; font-weight:500; font-size:46px; line-height:1.05; letter-spacing:-.02em}
 .nav.arrived .nav-dist{color:var(--ok-ink); font-size:38px}
 .nav-sub{font-size:14px; color:var(--ink-2)}
+.nav-sub.mono{font-family:"IBM Plex Mono",monospace; font-size:12px}
+.live-coord{font-size:22px; font-weight:500; letter-spacing:-.01em}
 .nav-msg{font-size:14px; padding:10px 12px; border-radius:8px; background:var(--surface-2); color:var(--ink-2); border-left:3px solid var(--line-strong)}
 .nav-msg.warn{background:var(--warn-soft); color:var(--warn-ink); border-left-color:var(--warn)}
 .nav-msg.ok{background:var(--ok-soft); color:var(--ok-ink); border-left-color:var(--ok)}
@@ -1581,7 +1583,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <div><dt>Marge d'erreur ± E %</dt><dd>La marge exprimée en pourcentage du résultat, avec un niveau de confiance (90 % par défaut). « 100 m³ ± 8 % » signifie : avec 90 % de confiance, le volume réel est entre 92 et 108 m³.</dd></div>
         <div><dt>Objectif de précision</dt><dd>Par défaut, une marge de ± 10 % au plus, avec 90 % de confiance : « ± 10 % (confiance 90 %) ». Les deux chiffres se règlent dans Réglages. Une marge de ± 10 % ne veut pas dire « fiable à 90 % » : elle dit de combien le résultat peut s'écarter de la vraie valeur.</dd></div>
         <div><dt>Combien de placettes ?</dt><dd>L'étape 1 · Préparer l'estime dès que la forêt est délimitée : <span class="formula">n = (t × CV / E)²</span>, CV étant la variabilité du volume entre placettes et E la marge visée. Avant toute mesure, CV est une hypothèse (50 % par défaut) ; dès 2 placettes mesurées, la variabilité réelle la remplace et l'application signale si l'estimation change. Sur une petite forêt, le nombre est corrigé par <span class="formula">n / (1 + n / N)</span>, N étant le nombre de placettes que contient la forêt.</dd></div>
-        <div><dt>Comment réduire la marge ?</dt><dd>Ajouter des placettes : la marge décroît comme 1/√n. L'étape 1 · Préparer calcule le nombre de placettes nécessaire dès que deux placettes sont mesurées. Séparer les essences ne rend pas le total plus précis. Si la forêt a des zones nettement différentes (une peupleraie et une chênaie, par exemple), on peut en faire deux inventaires séparés, un par zone.</dd></div>
+        <div><dt>Comment réduire la marge ?</dt><dd>Ajouter des placettes : la marge décroît comme 1/√n. L'étape 1 · Préparer calcule le nombre de placettes nécessaire dès que deux placettes sont mesurées, donne la marge attendue pour un nombre donné et ajoute au plan les placettes manquantes, dans les zones les moins couvertes, sans déplacer celles déjà mesurées. Séparer les essences ne rend pas le total plus précis. Si la forêt a des zones nettement différentes (une peupleraie et une chênaie, par exemple), on peut en faire deux inventaires séparés, un par zone.</dd></div>
         <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse ; la Synthèse compare Arboreal et la saisie manuelle.</dd></div>
       </dl>
     </div>
@@ -5687,6 +5689,157 @@ function plRecommend() {
   const r = nRequired(m.cv, Infinity);
   return r ? { n: r.n, cv: m.cv, base: m.base, demo: m.demo, Npos: NaN } : null;
 }
+
+/* ---------- coordonnées et position GPS en direct (ajout du 06/11/2026) ---------- */
+function fmtCoord(lat, lon) { return isFinite(lat) && isFinite(lon) ? lat.toFixed(6) + " ; " + lon.toFixed(6) : "-"; }
+const LIVE = { watch: null, fix: null, err: "", timer: null };
+function liveGpsToggle() {
+  if (LIVE.watch != null) return liveGpsStop();
+  if (!navigator.geolocation) { LIVE.err = "Cet appareil ne fournit pas de position."; return liveGpsOut(); }
+  LIVE.err = ""; LIVE.fix = null;
+  try {
+    LIVE.watch = navigator.geolocation.watchPosition(pos => {
+      const c = pos.coords; LIVE.err = "";
+      LIVE.fix = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, alt: c.altitude, t: Date.now() };
+      NAV.last = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, age: 0 };
+      liveGpsOut();
+    }, err => {
+      LIVE.err = err && err.code === 1 ? "Accès à la position refusé : autorisez la localisation pour cette page."
+        : IN_VIEWER ? "La page claude.ai ne donne pas accès au GPS : ouvrez la version installée sur le téléphone." : "Position indisponible pour le moment : restez à découvert quelques secondes.";
+      liveGpsOut();
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+  } catch (e) { LIVE.err = "Position indisponible."; }
+  if (!LIVE.timer) LIVE.timer = setInterval(liveGpsOut, 1000);
+  fxWake(true);
+  liveGpsOut();
+}
+function liveGpsStop() {
+  if (LIVE.watch != null) { try { navigator.geolocation.clearWatch(LIVE.watch); } catch (e) { } LIVE.watch = null; }
+  if (LIVE.timer) { clearInterval(LIVE.timer); LIVE.timer = null; }
+  if (!state.field.openPlot && !NAV.ov) fxWake(false);
+  liveGpsOut();
+}
+/* placette du plan la plus proche d'une position */
+function plNearest(lat, lon, onlyTodo) {
+  let best = null;
+  state.plan.points.forEach(q => {
+    if (onlyTodo && plStatus(q).now) return;
+    const g = plDistBearing([lat, lon], [q.lat, q.lon]);
+    if (!best || g.d < best.d) best = { p: q, d: g.d, brg: g.brg };
+  });
+  return best;
+}
+function liveGpsOut() {
+  const box = $("#liveGps"); if (!box) return;
+  const on = LIVE.watch != null, f = LIVE.fix;
+  const btn = $("#liveGpsBtn"); if (btn) { btn.textContent = on ? "Arrêter" : "Afficher ma position"; btn.classList.toggle("primary", !on); }
+  box.innerHTML = "";
+  if (!on && !f) { box.appendChild(el("p", { class: "hint", style: "margin:0", text: "Coordonnées GPS de l'appareil, mises à jour en continu (degrés décimaux, WGS 84). Le GPS fonctionne sans réseau." })); return; }
+  if (LIVE.err) box.appendChild(el("div", { class: "note warn", text: LIVE.err }));
+  if (!f) { if (on && !LIVE.err) box.appendChild(el("p", { class: "hint", style: "margin:0", text: "Recherche de la position…" })); return; }
+  const age = (Date.now() - f.t) / 1000;
+  box.appendChild(el("div", { class: "live-coord mono", text: fmtCoord(f.lat, f.lon) }));
+  const chips = el("div", { class: "pl-stats" }, [
+    el("span", { class: "chip " + (f.acc <= 5 ? "ok" : f.acc > 15 ? "warn" : ""), text: "précision ± " + fmt(f.acc, 0) + " m" }),
+    isFinite(f.alt) && f.alt !== null ? el("span", { class: "chip", text: "altitude " + fmt(f.alt, 0) + " m" }) : null,
+    el("span", { class: "chip" + (age > 20 ? " warn" : ""), text: on ? (age < 2 ? "en direct" : "il y a " + Math.round(age) + " s") : "arrêté" })
+  ]);
+  box.appendChild(chips);
+  if (state.plan.points.length) {
+    const nn = plNearest(f.lat, f.lon, false);
+    if (nn) box.appendChild(el("p", { class: "hint", style: "margin:0", html: "Placette la plus proche : <b>n° " + nn.p.num + "</b>, à " + fmt(nn.d, 0) + " m vers le " + plCardinal(nn.brg) + " (cap " + Math.round(nn.brg) + "°) · centre " + fmtCoord(nn.p.lat, nn.p.lon) }));
+  }
+  box.appendChild(el("div", { class: "pl-tools" }, [
+    el("button", { class: "btn sm", type: "button", text: "Copier les coordonnées", onclick: () => {
+      const t = f.lat.toFixed(6) + ", " + f.lon.toFixed(6);
+      try { navigator.clipboard.writeText(t).then(() => toast("Copié : " + t), () => toast(t, 6000)); } catch (e) { toast(t, 6000); }
+    } })
+  ]));
+}
+
+/* ---------- compléter le plan d'après la précision visée (ajout du 06/11/2026) ----------
+   Marge attendue avec n placettes : E = t(n-1) × CV / √n, × √(1 - n/N) avec la correction de
+   population finie. Les placettes ajoutées sont posées une à une au point de la forêt le plus
+   éloigné des placettes existantes (zones les moins couvertes), sans déplacer celles du plan. */
+function margeAttendue(cv, n, Npop) {
+  if (!(cv > 0) || !(n >= 2)) return NaN;
+  const t = tInv2T(1 - state.config.conf, n - 1);
+  const f = isFinite(Npop) && Npop > n ? Math.sqrt(1 - n / Npop) : 1;
+  return t * cv / Math.sqrt(n) * f * 100;
+}
+function plAddExtra(k) {
+  const ring = state.parcelle.ring, plan = state.plan;
+  if (!(k >= 1) || ring.length < 3) return [];
+  const proj = plProj(ring), poly = ring.map(proj.fwd), area = polygonAreaM2(ring);
+  const r = num(plan.radius) || 7.98, margin = plan.keepInside ? r : 0;
+  const step = Math.max(1, Math.sqrt(area / 5000));
+  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+  poly.forEach(q => { minx = Math.min(minx, q[0]); maxx = Math.max(maxx, q[0]); miny = Math.min(miny, q[1]); maxy = Math.max(maxy, q[1]); });
+  let cand = [];
+  const grille = mg => { const c = []; for (let x = minx + step / 2; x <= maxx; x += step) for (let y = miny + step / 2; y <= maxy; y += step) if (plInside([x, y], poly) && (!(mg > 0) || plEdgeDist([x, y], poly) >= mg)) c.push([x, y]); return c; };
+  cand = grille(margin); if (!cand.length && margin > 0) cand = grille(0);
+  if (!cand.length) return [];
+  const pris = plan.points.map(q => proj.fwd([q.lat, q.lon]));
+  const dmin = cand.map(c => pris.reduce((m, q) => Math.min(m, Math.hypot(c[0] - q[0], c[1] - q[1])), Infinity));
+  const nouveaux = [];
+  for (let i = 0; i < k; i++) {
+    let bi = -1, bd = -1;
+    for (let j = 0; j < cand.length; j++) if (dmin[j] > bd) { bd = dmin[j]; bi = j; }
+    if (bi < 0 || bd < r) break;                           // plus de place sans chevaucher une placette
+    const c = cand[bi]; nouveaux.push(c);
+    for (let j = 0; j < cand.length; j++) dmin[j] = Math.min(dmin[j], Math.hypot(cand[j][0] - c[0], cand[j][1] - c[1]));
+  }
+  // ordre de marche des ajouts : du nord vers le sud, de proche en proche
+  const ordre = [], reste = nouveaux.slice();
+  if (reste.length) {
+    reste.sort((a, b) => b[1] - a[1]); let cur = reste.shift(); ordre.push(cur);
+    while (reste.length) { reste.sort((a, b) => Math.hypot(a[0] - cur[0], a[1] - cur[1]) - Math.hypot(b[0] - cur[0], b[1] - cur[1])); cur = reste.shift(); ordre.push(cur); }
+  }
+  let n0 = plan.points.reduce((m, q) => Math.max(m, q.num), 0);
+  const stamp = Date.now().toString(36).toUpperCase(), at = new Date().toISOString();
+  const pts = ordre.map(c => { const ll = proj.inv(c); n0++; return { id: "Q" + n0 + "-" + stamp, num: n0, lat: ll[0], lon: ll[1], added: at }; });
+  plan.points.push(...pts);
+  if (!plan.ringKey) plan.ringKey = plHash(ring);
+  return pts;
+}
+function blocCompleter(e) {
+  const plan = state.plan, nPlan = plan.points.length;
+  if (!e || !e.m || !nPlan) return null;
+  const Npop = state.config.fpc ? e.area / e.m.meanArea : Infinity;
+  const th = state.config.threshold, cf = fmt(state.config.conf * 100, 0);
+  const box = el("div", { class: "card-lite", style: "display:flex; flex-direction:column; gap:8px; margin-top:4px" });
+  box.appendChild(el("b", { text: "Compléter le plan d'après les mesures" }));
+  const objIn = el("input", { id: "plObjE", type: "number", min: "1", max: "50", step: "1", value: String(th), style: "width:70px", "aria-label": "Marge visée (%)" });
+  objIn.addEventListener("change", () => { const v = num(objIn.value); if (v >= 1 && v <= 50) { state.config.threshold = v; persist(); renderAll(); } });
+  box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px" }, [el("span", { text: "Précision visée : ±" }), objIn, el("span", { text: "% sur le volume (confiance " + cf + " %)." })]));
+  const eNow = margeAttendue(e.m.cv, e.m.base, Npop), eGoal = e.cur ? e.cur.n : NaN;
+  const lignes = [];
+  lignes.push("Variabilité mesurée entre placettes : <b>" + fmt(e.m.cv * 100, 0) + " %</b> (sur " + e.m.base + " placettes mesurées), marge actuelle ± " + fmt(eNow, 1) + " %.");
+  lignes.push("Pour ± " + fmt(th, 0) + " % : <b>" + eGoal + " placettes</b> au total ; le plan en compte " + nPlan + ".");
+  box.appendChild(el("p", { style: "margin:0", html: lignes.join(" ") }));
+  const manque = isFinite(eGoal) ? Math.max(0, eGoal - nPlan) : 0;
+  if (!manque) { box.appendChild(el("div", { class: "note ok", text: "Le plan contient assez de placettes pour atteindre l'objectif, si la variabilité se confirme sur les placettes restantes." })); return box; }
+  const kIn = el("input", { id: "plAddK", type: "number", min: "1", max: "200", step: "1", value: String(manque), style: "width:70px", "aria-label": "Placettes à ajouter" });
+  const prev = el("span", { class: "hint" });
+  const maj = () => { const k = Math.max(0, parseInt(kIn.value, 10) || 0), n = nPlan + k; prev.textContent = "→ " + n + " placettes, marge attendue ± " + fmt(margeAttendue(e.m.cv, n, Npop), 1) + " %"; };
+  kIn.addEventListener("input", maj); maj();
+  box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px; flex-wrap:wrap" }, [
+    el("span", { text: "Ajouter" }), kIn, el("span", { text: "placettes" }), prev
+  ]));
+  box.appendChild(el("div", { class: "pl-tools" }, [el("button", { class: "btn primary", type: "button", text: "Ajouter au plan", onclick: () => {
+    const k = parseInt(kIn.value, 10);
+    if (!(k >= 1 && k <= 200)) return toast("Entre 1 et 200 placettes");
+    const pts = plAddExtra(k);
+    if (!pts.length) return toast("Plus de place dans la forêt sans chevaucher une placette existante");
+    const e1 = plotEstimate();
+    plan.ajouts = (plan.ajouts || []).concat([{ at: pts[0].added, n: pts.length, cv: e.m.cv, base: e.m.base, objectif: th }]);
+    if (e1 && e1.best) plan.est0 = { n: e1.best.n, cv: e.m.cv, measured: true, at: new Date().toISOString() };
+    PL.fitKey = ""; renderAll();
+    toast(pts.length + " placette" + (pts.length > 1 ? "s ajoutées" : " ajoutée") + " : n° " + pts[0].num + (pts.length > 1 ? " à " + pts[pts.length - 1].num : ""), 4500);
+  } })]));
+  box.appendChild(el("p", { class: "hint", style: "margin:0", text: "Les placettes ajoutées vont dans les zones les moins couvertes (le plus loin possible des placettes existantes), sans déplacer ni renuméroter celles déjà prévues ou mesurées. Le calcul suppose que la variabilité mesurée vaut pour toute la forêt : refaites le point après les nouvelles placettes." + (plan.locked ? " Le plan reste figé : les ajouts en font partie pour les campagnes suivantes." : "") }));
+  return box;
+}
 /* ---------- temps de terrain ----------
    placettes : n × durée par placette + marche (parcours du guidage, ou estimation simple
    (n - 1) × √(surface / n) si le plan n'est pas tiré) à la vitesse de marche en forêt ;
@@ -5797,8 +5950,9 @@ function estimateBlock(opts) {
         (ref.fromPrior ? "" : "Le plan a été fait sur une estimation de " + ref.n + " le " + new Date(ref.at).toLocaleDateString("fr-FR") + ". ") +
         (more ? "La forêt est plus variable que supposé (" + fmt(e.m.cv * 100, 0) + " % au lieu de " + fmt(ref.cv * 100, 0) + " %) : il faut plus de placettes pour atteindre ± " + th + " %."
               : "La forêt est moins variable que supposé (" + fmt(e.m.cv * 100, 0) + " % au lieu de " + fmt(ref.cv * 100, 0) + " %) : moins de placettes suffisent.") +
-        (more && plan.locked ? " Débloquez le plan pour en ajouter, de préférence dans les zones les moins couvertes." : "") }));
+        (more && opts.take ? " Ajoutez-les ci-dessous, dans les zones les moins couvertes." : "") }));
     } else box.appendChild(el("p", { class: "hint", style: "margin:0", text: "L'estimation de départ se confirme." }));
+    if (opts.take) { const bc = blocCompleter(e); if (bc) box.appendChild(bc); }
   }
   // rapport à la taille de la forêt
   const share = e.share;
@@ -6304,6 +6458,13 @@ function renderFxPlan(body) {
 
   /* --- 3. guidage --- */
   const k3 = [];
+  k3.push(el("div", { class: "card-lite", style: "display:flex; flex-direction:column; gap:8px" }, [
+    el("div", { class: "row", style: "justify-content:space-between; align-items:center" }, [
+      el("b", { text: "Ma position GPS" }),
+      el("button", { id: "liveGpsBtn", class: "btn sm" + (LIVE.watch != null ? "" : " primary"), type: "button", text: LIVE.watch != null ? "Arrêter" : "Afficher ma position", onclick: liveGpsToggle })
+    ]),
+    el("div", { id: "liveGps", style: "display:flex; flex-direction:column; gap:6px" })
+  ]));
   if (!plan.points.length) k3.push(el("p", { class: "hint", style: "margin:0", text: "Les placettes à rejoindre apparaîtront ici." }));
   else {
     const ss = fieldSession();
@@ -6332,7 +6493,8 @@ function renderFxPlan(body) {
         el("span", { class: "n", text: String(p.num) }),
         el("div", null, [
           el("b", { text: "Placette " + p.num }),
-          el("div", { class: "m", text: (st.now ? "mesurée aujourd'hui" : st.before.length ? "dernière mesure : " + st.before[st.before.length - 1].ss.label : "à mesurer") + (d ? " · " + fmt(d.d, 0) + " m " + plCardinal(d.brg) : "") })
+          el("div", { class: "m", text: (st.now ? "mesurée aujourd'hui" : st.before.length ? "dernière mesure : " + st.before[st.before.length - 1].ss.label : "à mesurer") + (p.added ? " · ajoutée le " + new Date(p.added).toLocaleDateString("fr-FR") : "") + (d ? " · " + fmt(d.d, 0) + " m " + plCardinal(d.brg) : "") }),
+          el("div", { class: "m mono", text: fmtCoord(p.lat, p.lon) })
         ]),
         el("div", { class: "acts" }, st.now
           ? el("button", { class: "btn sm", type: "button", text: "Voir", onclick: () => { state.config.voie = "foresteye"; state.field.openPlot = clean(st.now.s.sample_id); renderAll(); showTab("mesurer"); } })
@@ -6343,6 +6505,7 @@ function renderFxPlan(body) {
     if (IN_VIEWER) k3.push(el("div", { class: "note warn", text: "Dans la page claude.ai, le GPS est bloqué : le guidage s'ouvre mais ne peut pas vous situer. Utilisez la version installée sur le téléphone, ou exportez le plan en GPX pour Guru Maps." }));
   }
   body.appendChild(plStep(3, "Se rendre aux placettes", k3));
+  liveGpsOut();
   if (PL.map) plRenderMap();
 }
 
@@ -6432,6 +6595,8 @@ function plNavOpen(id) {
   fxStartOrientation();   // à appeler dans le geste (iOS)
   if (NAV.ov) plNavClose(true);
   NAV.id = id; NAV.arrived = false; NAV.follow = true; NAV.err = ""; NAV.fixes = []; NAV.course = NaN;
+  // le guidage a son propre suivi GPS : on coupe « Ma position » et on repart de sa dernière position
+  if (LIVE.watch != null) { if (LIVE.fix) NAV.fixes.push({ lat: LIVE.fix.lat, lon: LIVE.fix.lon, acc: LIVE.fix.acc, t: Date.now() }); liveGpsStop(); }
   const ov = el("div", { class: "nav", role: "dialog", "aria-modal": "true", "aria-label": "Guidage vers la placette" });
   ov.innerHTML =
     '<div class="nav-in">' +
@@ -6440,7 +6605,7 @@ function plNavOpen(id) {
     '<circle r="56" fill="none" stroke="var(--line-strong)" stroke-width="2"/>' +
     '<g id="navNorth"><text y="-42" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ochre)" font-family="IBM Plex Mono,monospace">N</text></g>' +
     '<g id="navArrow"><path d="M0,-46 L17,14 L0,4 L-17,14 Z" fill="var(--accent)"/></g><g id="navOk" style="visibility:hidden"><path d="M-22,0 L-6,16 L24,-18" fill="none" stroke="var(--ok)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>' +
-    '<div><div class="nav-dist" id="navDist">…</div><div class="nav-sub" id="navSub"></div><div class="nav-sub" id="navAcc"></div></div></div>' +
+    '<div><div class="nav-dist" id="navDist">…</div><div class="nav-sub" id="navSub"></div><div class="nav-sub" id="navAcc"></div><div class="nav-sub mono" id="navCoord"></div></div></div>' +
     '<div class="nav-msg" id="navMsg"></div>' +
     '<div class="nav-map" id="navMap"></div>' +
     '<div class="nav-bot"><button class="btn" type="button" id="navPrev">◀ Précédente</button><button class="btn" type="button" id="navNext">Suivante ▶</button>' +
@@ -6547,6 +6712,8 @@ function plNavUpdate(refit) {
   const arb = voieActive() === "arboreal";
   go.textContent = arb ? "Placette mesurée dans Arboreal : suivante" : st.now ? "Déjà mesurée : voir la placette " + p.num : "Je suis au centre : ouvrir la placette " + p.num;
   const g = plNavGeom(), msg = $("#navMsg", ov);
+  const meC = plNavPos();
+  $("#navCoord", ov).textContent = "Centre " + fmtCoord(p.lat, p.lon) + (meC ? " · vous " + fmtCoord(meC.lat, meC.lon) : "");
   const compass = FX.compass === "ok" && isFinite(FX.heading);
   if (!g) {
     $("#navDist", ov).textContent = "-";
