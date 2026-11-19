@@ -3789,6 +3789,9 @@ const BASEMAPS = {
    la solution des moindres carrés (Procuste) θ = atan2(Σ(vE - uN), Σ(uE + vN)).
    Fiable si au moins 3 arbres assez écartés et un écart résiduel faible. */
 const ROT_CACHE = {};
+/* rotation appliquée à une placette (19/11/2026) : automatique pour Arboreal ; aucune pour une
+   placette saisie dans ForestEye, dont les positions viennent de l'azimut (nord déjà connu) */
+function plotRotDeg(p) { return !p || (p.raw && p.raw.field) ? 0 : (plotRotAuto(p).deg || 0); }
 function plotRotAuto(p) {
   if (!p) return {};
   const key = p.id + "|" + p.sessionId;
@@ -3822,7 +3825,7 @@ function treeLatLon(t) {
   if (!p || !isFinite(p.lat) || !isFinite(p.lon) || !isFinite(t.x) || !isFinite(t.z)) {
     return isFinite(t.lat) && isFinite(t.lon) ? [t.lat, t.lon] : null;
   }
-  const th = ((state.config.rot || 0) + (state.config.rotAuto !== false ? plotRotAuto(p).deg || 0 : 0)) * Math.PI / 180;
+  const th = plotRotDeg(p) * Math.PI / 180;
   const u = t.x, v = -t.z;
   const E = u * Math.cos(th) + v * Math.sin(th);
   const N = -u * Math.sin(th) + v * Math.cos(th);
@@ -3837,8 +3840,8 @@ function diamColor(D) {
 function renderMap() {
   const notice = $("#mapNotice"); notice.innerHTML = "";
   Object.keys(ROT_CACHE).forEach(k => delete ROT_CACHE[k]);
-  $("#rotAutoWrap").hidden = state.config.posMode === "gps";
-  $("#rotWrap").hidden = state.config.posMode === "gps";
+  $("#rotAutoWrap").hidden = true;   // orientation toujours automatique (19/11/2026)
+  $("#rotWrap").hidden = true;
   const holder = $("#map");
   if (typeof L === "undefined") {
     holder.innerHTML = '<div class="empty" style="height:100%; display:flex; align-items:center; justify-content:center">La librairie de carte n\'a pas pu être chargée (pas de connexion ?). Le plan de placette ci-dessous fonctionne hors connexion.</div>';
@@ -3930,12 +3933,11 @@ function renderMap() {
         ? 'Centre utilisé : <b>le centre prévu du plan</b>, rejoint avec le guidage GPS' + (nPlan ? ' (' + nPlan + ' placette' + (nPlan > 1 ? 's' : '') + (ecarts.length ? ' ; écart médian avec le centre relevé par Arboreal : ' + fmt(ecarts[Math.floor(ecarts.length / 2)], 0) + ' m, au plus ' + fmt(ecarts[ecarts.length - 1], 0) + ' m' : '') + ')' : '') + '.' + (nArb ? ' ' + nArb + ' placette' + (nArb > 1 ? 's' : '') + ' non rattachée' + (nArb > 1 ? 's' : '') + ' au plan : centre Arboreal.' : '')
         : 'Centre utilisé : le centre relevé par Arboreal.') +
       ' ' + (() => {
-        if (state.config.rotAuto === false) return 'Orientation manuelle : azimut de ' + fmt(state.config.rot || 0, 0) + '° pour toutes les placettes.';
         const rs = plots.filter(p => !p.raw.field).map(p => plotRotAuto(p)), ok = rs.filter(r => r.ok);
         const degs = ok.map(r => r.deg > 180 ? r.deg - 360 : r.deg).sort((a, b) => a - b);
         return 'Orientation <b>redressée automatiquement</b> pour ' + ok.length + ' placette' + (ok.length > 1 ? 's' : '') + ' sur ' + rs.length + ' d\'après le GPS des arbres' +
           (degs.length ? ' (rotation de ' + fmt(degs[0], 0) + '° à ' + fmt(degs[degs.length - 1], 0) + '°, écart résiduel médian ' + fmt(ok.map(r => r.resid).sort((a, b) => a - b)[Math.floor(ok.length / 2)], 1) + ' m)' : '') + '.' +
-          (rs.length > ok.length ? ' Les autres (moins de 3 arbres ou GPS trop dispersé) gardent le repère tel quel.' : '') + (state.config.rot ? ' Correction ajoutée : ' + fmt(state.config.rot, 0) + '°.' : '');
+          (rs.length > ok.length ? ' Les autres (moins de 3 arbres ou GPS trop dispersé) gardent le repère tel quel.' : '');
       })() + ' Les calculs (volumes, marges) n\'utilisent pas les positions.</div>');
   }
   if (!placed && trees.length) notice.insertAdjacentHTML("beforeend", enPlein()
@@ -4139,7 +4141,7 @@ function fcPlots() {
           G_m2_ha: rnd(p.gHa, 3), V_m3_ha: rnd(p.vHa, 2), tiges_ha: rnd(p.nHa, 1),
           centre_lat: rnd(p.lat, 8), centre_lon: rnd(p.lon, 8), centre_source: p.centreSrc === "plan" ? "plan" : "arboreal",
           centre_arboreal_lat: rnd(p.latArb, 8), centre_arboreal_lon: rnd(p.lonArb, 8),
-          rotation_deg: state.config.posMode === "gps" ? null : rnd((state.config.rot || 0) + (state.config.rotAuto !== false ? plotRotAuto(p).deg || 0 : 0), 1)
+          rotation_deg: state.config.posMode === "gps" ? null : rnd(plotRotDeg(p), 1)
         }
       };
     })
