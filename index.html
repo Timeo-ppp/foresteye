@@ -1100,18 +1100,17 @@ input.fx-big{font-size:18px; padding:10px 12px}
       <div class="note info">
         <b>Sur le terrain avec Arboreal</b>
         <ol style="margin:6px 0 8px; padding-left:20px">
-          <li>Une seule session Arboreal pour la journée.</li>
-          <li>Rejoignez chaque placette avec le guidage de l'étape 1, puis créez <b>une placette Arboreal par placette du plan</b>.</li>
-          <li><b>Nommez chaque placette Arboreal avec son numéro du plan</b> (« 7 » pour la placette n° 7). C'est ce numéro qui rattache les arbres à la bonne placette. Sans lui, le rattachement se fait par la position GPS, moins sûre sous couvert (10 à 20 m d'erreur, placettes voisines confondues).</li>
-          <li>Ne mettez jamais les arbres de plusieurs placettes dans la même placette Arboreal.</li>
-          <li><b>En fin de journée, un seul export</b> de la session (les 5 fichiers CSV), à déposer ci-dessous. Un export intermédiaire à midi sert de sauvegarde en cas de problème de téléphone.</li>
+          <li>Une session Arboreal par journée.</li>
+          <li>Sur chaque placette du plan, créez une placette Arboreal <b>nommée avec son numéro</b> (« 7 » pour la n° 7) : c'est lui qui rattache les arbres à la bonne placette.</li>
+          <li>Une placette Arboreal = une seule placette du plan.</li>
+          <li><b>En fin de journée</b>, exportez la session et déposez les fichiers ci-dessous. Un export à midi sert de sauvegarde.</li>
         </ol>
-        <p>En lisière, ne mesurez que les arbres côté forêt. Arboreal mesure une hauteur par placette. Dans une plantation homogène (même essence, même âge), cette hauteur suffit : c'est le choix fait à La Tremblade, à citer comme limite. Dans un peuplement mélangé ou irrégulier, complétez à l'étape b la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne.</p>
+        <p style="margin:0">En lisière, seulement les arbres côté forêt. Arboreal mesure une hauteur par placette : elle suffit dans une plantation homogène ; sinon, complétez 2 à 3 hauteurs par placette à l'étape b.</p>
       </div>
       <div class="drop" id="drop">
-        <h3>Déposez les fichiers exportés par Arboreal</h3>
-        <p class="hint" style="margin:0">samples.csv · trees.csv · stems.csv · heights.csv · calculations.csv<br>
-          (samples et trees suffisent aux calculs · un contour de parcelle s'importe aussi ici)</p>
+        <h3>Déposez l'export Arboreal</h3>
+        <p class="hint" style="margin:0">Les 5 fichiers CSV de la session (samples et trees au minimum).<br>
+          Un contour de parcelle (GeoJSON, KML) s'importe aussi ici.</p>
         <button class="btn primary" id="btnPick" type="button">Choisir des fichiers</button>
         <input type="file" id="filePick" multiple accept=".csv,.txt,.geojson,.json,.kml" hidden>
       </div>
