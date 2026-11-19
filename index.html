@@ -1884,6 +1884,7 @@ const DEFAULT_SPECIES = [
 ];
 const NOTE_COEFS = "Coefficients relus via le paquet R GCubeR (CRAN), qui reprend ces équations. À vérifier dans les publications d'origine. Selon la table utilisée, le coefficient peut varier d'environ 10 %, ce qui s'ajoute à la marge d'échantillonnage.";
 const VOL_LBL = "Volume bois fort tige (jusqu'à 7 cm de diamètre)";
+const VOL_AIDE_SIMPLE = "Le volume de bois du tronc seul, sans les branches, du pied jusqu'à l'endroit où il ne fait plus que 7 cm de diamètre : c'est la mesure officielle de l'inventaire forestier national (IGN). Calcul : surface de la coupe du tronc × hauteur × coefficient de forme de l'essence (un tronc n'est pas un cylindre parfait).";
 const VOL_AIDE = "Volume bois fort tige : le tronc, du sol jusqu'à une découpe de 7 cm de diamètre (définition de l'inventaire forestier national IGN), sans les branches. V = g × H × f, f étant le coefficient de forme de l'essence.";
 /* migration des projets version 1 : valeurs de l'ancien fichier Excel (sans source documentée).
    Une essence restée à cette valeur passe à la valeur publiée ; une valeur modifiée à la main est gardée. */
@@ -2122,9 +2123,9 @@ function msgHauteurs(h) {
 function hauteursCard() {
   const rows = hauteursParEssence(); if (!rows.length) return null;
   const card = el("div", { class: "card" });
-  card.appendChild(el("h3", { class: "blk" }, [document.createTextNode("Hauteurs mesurées par essence"),
-    aide("La hauteur n'est mesurée que sur 2 à 3 arbres par placette ; une courbe hauteur-diamètre par essence donne la hauteur des autres. Il faut au moins 12 à 15 hauteurs par essence sur la campagne pour que cette courbe soit fiable.")]));
-  card.appendChild(el("p", { class: "hint", style: "margin:4px 0 12px", text: "Protocole : diamètre sur tous les arbres, hauteur sur 2 à 3 arbres par placette de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne." + (state.config.heightMode === "brute" ? " La courbe est désactivée dans Réglages : les hauteurs sont utilisées telles qu'importées." : "") }));
+  card.appendChild(el("h3", { class: "blk" }, [document.createTextNode("Hauteurs des arbres"),
+    aide("On ne mesure la hauteur que de quelques arbres. Pour chaque essence, l'application relie la grosseur du tronc à la hauteur et en déduit celle des autres arbres. Il faut au moins 12 hauteurs par essence sur la campagne pour que ce soit fiable.")]));
+  card.appendChild(el("p", { class: "hint", style: "margin:4px 0 12px", text: "Le tour du tronc se mesure sur tous les arbres, la hauteur sur quelques-uns seulement." + (state.config.heightMode === "brute" ? " L'estimation des hauteurs est désactivée dans Réglages : les hauteurs sont utilisées telles qu'importées." : "") }));
   // liste plutôt que tableau : le message reste lisible en entier sur un téléphone
   const liste = el("div", { class: "filelist h-liste" });
   rows.forEach(h => liste.appendChild(el("div", { class: "filerow", style: "flex-wrap:wrap; row-gap:6px" }, [
@@ -3449,9 +3450,11 @@ function relChip(ePct) {
   if (!isFinite(ePct)) return el("span", { class: "chip", text: "non calculable" });
   const th = state.config.threshold;
   if (ePct <= th) return el("span", { class: "chip ok" }, [el("span", { class: "dot" }), document.createTextNode("objectif atteint (≤ " + fmt(th, 0) + " %)")]);
-  if (ePct <= th * 2) return el("span", { class: "chip warn" }, [el("span", { class: "dot" }), document.createTextNode("au-dessus de l'objectif")]);
+  if (ePct <= th * 2) return el("span", { class: "chip warn" }, [el("span", { class: "dot" }), document.createTextNode("marge trop large")]);
   return el("span", { class: "chip crit" }, [el("span", { class: "dot" }), document.createTextNode("très insuffisant")]);
 }
+/* « 9 chances sur 10 » pour une confiance de 90 % */
+function chances() { return fmt(state.config.conf * 10, state.config.conf * 10 % 1 ? 1 : 0) + " chances sur 10"; }
 function confLabel() { return "confiance " + fmt(state.config.conf * 100, 0) + " %"; }
 function statTable(rows) {
   const tw = el("div", { class: "tbl-wrap" });
@@ -3478,7 +3481,7 @@ function statTable(rows) {
 /* rappel : la marge ne compte que l'erreur d'échantillonnage */
 function marginScopeNote(a) {
   const est = allTrees().filter(t => t.hSrc === "courbe" || t.hSrc === "moyenne" || t.hSrc === "representative").length;
-  return el("p", { class: "hint", style: "margin:12px 0 0", text: "La marge ne compte que le hasard de l'échantillonnage (l'endroit où tombent les placettes). Elle n'inclut ni les erreurs de mesure, ni les coefficients de forme" + (est ? ", ni l'erreur des " + est + " hauteurs estimées" : "") + " : l'écart réel peut être un peu plus large." });
+  return el("p", { class: "hint", style: "margin:12px 0 0", text: "D'où vient la marge : on n'a pas mesuré toute la forêt, seulement quelques placettes ; d'autres placettes auraient donné un chiffre un peu différent. Elle ne compte pas les petites erreurs de mesure, l'incertitude du coefficient de forme" + (est ? ", ni celle des " + est + " hauteurs non mesurées arbre par arbre" : "") + " : l'écart réel peut être un peu plus large." });
 }
 function renderStats() {
   const a = analysis();
@@ -3609,7 +3612,7 @@ function renderResult() {
   const items = [
     { k: "n", lbl: "Nombre de tiges", tl: "Nombre de tiges", stat: a.ind.n, unit: "", dec: 0, hdec: 1, hu: "tiges/ha" },
     { k: "g", lbl: "Surface terrière", tl: "Surface terrière (m²)", stat: a.ind.g, unit: "m²", dec: 1, hdec: 2, hu: "m²/ha" },
-    { k: "v", lbl: VOL_LBL, tl: "Volume bois fort tige, jusqu'à 7 cm de diamètre (m³)", stat: a.ind.v, unit: "m³", dec: 1, hdec: 1, hu: "m³/ha" }
+    { k: "v", lbl: "Volume de bois (tronc)", tl: "Volume de bois (m³)", stat: a.ind.v, unit: "m³", dec: 1, hdec: 1, hu: "m³/ha" }
   ];
   const tigesC = allTrees(), cepees = nSouches(tigesC) !== tigesC.length;
   const nArbres = plein ? nSouches(tigesC) : a.plots.length ? a.plots.reduce((s, p) => s + p.sHa, 0) / a.plots.length * F : NaN;
@@ -3619,39 +3622,39 @@ function renderResult() {
     const e = it.stat.ePct;
     const cls = plein ? "k-ok" : !isFinite(e) ? "" : (e <= state.config.threshold ? "k-ok" : (e <= state.config.threshold * 2 ? "k-warn" : "k-crit"));
     const card = el("div", { class: "kpi " + cls });
-    card.appendChild(el("span", { class: "lbl" }, [document.createTextNode(it.lbl), it.k === "v" ? aide(VOL_AIDE) : it.k === "n" ? aide("Chaque tige de 7,5 cm de diamètre et plus compte. Une cépée (plusieurs tiges sur une même souche) compte pour un arbre et pour autant de tiges.")
-      : aide("Surface terrière : surface de la coupe des troncs à 1,30 m du sol, additionnée sur tous les arbres (g = π × D² / 40000 par tige). Elle mesure la densité du peuplement.")]));
+    card.appendChild(el("span", { class: "lbl" }, [document.createTextNode(it.lbl), it.k === "v" ? aide(VOL_AIDE_SIMPLE) : it.k === "n" ? aide("Chaque tronc de 7,5 cm de diamètre ou plus compte comme une tige. Un arbre à plusieurs troncs sur la même souche (cépée) compte pour un arbre, mais pour autant de tiges que de troncs.")
+      : aide("Imaginez qu'on coupe tous les arbres à 1,30 m du sol : la surface terrière est la somme des surfaces de toutes ces coupes. Plus elle est grande, plus la forêt est riche en bois.")]));
     card.appendChild(el("div", { class: "kpi-val", html: fmt(val, plein && it.dec === 1 ? 2 : it.dec) + (it.unit ? ' <span class="unit">' + it.unit + "</span>" : "") }));
     if (plein) card.appendChild(el("span", { class: "sub", text: MSG_PLEIN }));
     else {
-      card.appendChild(el("span", { class: "sub", text: isFinite(e) ? "± " + fmt(e, 1) + " % (" + confLabel() + ")" : "marge non calculable" }));
-      if (isFinite(e) && isFinite(dl)) card.appendChild(el("span", { class: "sub", text: "entre " + fmt(Math.max(0, val - dl), it.dec) + " et " + fmt(val + dl, it.dec) + (it.unit ? " " + it.unit : "") }));
+      card.appendChild(el("span", { class: "sub", text: isFinite(e) ? "marge ± " + fmt(e, 1) + " %" : "marge non calculable" }));
+      if (isFinite(e) && isFinite(dl)) card.appendChild(el("span", { class: "sub", text: chances() + " entre " + fmt(Math.max(0, val - dl), it.dec) + " et " + fmt(val + dl, it.dec) + (it.unit ? " " + it.unit : "") }));
     }
     if (it.k === "n" && cepees && isFinite(nArbres)) card.appendChild(el("span", { class: "sub", text: (plein ? "soit " : "soit environ ") + fmt(nArbres, 0) + (Math.round(nArbres) > 1 ? " arbres (souches)" : " arbre (souche)") + ", cépées comprises" }));
     if (it.k === "v" && pi.noms.length) card.appendChild(el("span", { class: "sub", style: "color:var(--warn-ink)", text: "Volume " + mentionIndicative(pi) }));
     k.appendChild(card);
   });
   const dens = el("div", { class: "kpi" });
-  dens.appendChild(el("span", { class: "lbl", text: "Densité du peuplement" }));
+  dens.appendChild(el("span", { class: "lbl", text: "Pour 1 hectare" }));
   dens.appendChild(el("div", { class: "kpi-val", html: fmt(a.ind.g.mean, 1) + ' <span class="unit">m²/ha</span>' }));
-  dens.appendChild(el("span", { class: "sub", text: fmt(a.ind.v.mean, 0) + " m³/ha · " + fmt(a.ind.n.mean, 0) + " tiges/ha" }));
+  dens.appendChild(el("span", { class: "sub", text: "de surface terrière · " + fmt(a.ind.v.mean, 0) + " m³ de bois · " + fmt(a.ind.n.mean, 0) + " tiges" }));
   k.appendChild(dens);
   const hc = hauteursCard(); if (hc) $("#resultHauteurs").appendChild(hc);
 
   if (plein) { renderResultPleinDetail(a, items, d, rs); return; }
   const card = el("div", { class: "card" });
-  card.appendChild(el("h3", { class: "blk", text: "Détail de l'extrapolation" }));
+  card.appendChild(el("h3", { class: "blk", text: "Des placettes à toute la parcelle" }));
   const sameArea = a.plots.every(p => Math.abs(p.area - a.plots[0].area) < 0.01);
   card.appendChild(el("p", {
     class: "hint", style: "margin:4px 0 14px",
-    html: "Parcelle entière = moyenne à l'hectare des placettes × surface de la parcelle (" + fmt(F, 4) + " ha). " +
+    html: "On ne mesure que quelques placettes, puis on étend le résultat à toute la parcelle : moyenne des placettes ramenée à 1 hectare, multipliée par la surface de la parcelle (" + fmt(F, 4) + " ha). " +
       (sameArea && hasArea
-        ? "Toutes les placettes ont la même surface : c'est exactement la méthode du fichier Excel, moyenne par placette × F, avec F = " + fmt(state.parcelle.areaM2, 0) + " / " + fmt(a.plots[0].area, 2) + " = <b>" + fmt(state.parcelle.areaM2 / a.plots[0].area, 3) + "</b>."
-        : "Les placettes n'ont pas toutes la même surface" + (a.edgePlots ? " (" + a.edgePlots + " en lisière, surface corrigée)" : "") + " : chacune est d'abord ramenée à l'hectare, puis la moyenne est extrapolée.")
+        ? "Ici, toutes les placettes ont la même surface : cela revient à multiplier la moyenne d'une placette par <b>" + fmt(state.parcelle.areaM2 / a.plots[0].area, 3) + "</b> (" + fmt(state.parcelle.areaM2, 0) + " m² ÷ " + fmt(a.plots[0].area, 2) + " m²), comme dans le fichier Excel."
+        : "Les placettes n'ont pas toutes la même surface" + (a.edgePlots ? " (" + a.edgePlots + " au bord de la forêt, surface corrigée)" : "") + " : chacune est d'abord ramenée à 1 hectare, puis on fait la moyenne.")
   }));
   const tw = el("div", { class: "tbl-wrap" });
   const t = el("table");
-  t.innerHTML = "<thead><tr><th>Indicateur</th><th class='num'>Moyenne à l'hectare</th><th class='num'>× surface (ha)</th><th class='num'>Parcelle entière</th><th class='num'>Intervalle (" + confLabel() + ")</th><th class='num'>Marge ± E %</th><th>Objectif</th></tr></thead>";
+  t.innerHTML = "<thead><tr><th>Mesure</th><th class='num'>Pour 1 hectare</th><th class='num'>× surface (ha)</th><th class='num'>Toute la parcelle</th><th class='num'>" + chances() + " entre</th><th class='num'>Marge</th><th>Objectif</th></tr></thead>";
   const b = el("tbody");
   items.forEach(it => {
     const v = it.stat.mean * F, dl = it.stat.delta * F;
@@ -3674,11 +3677,11 @@ function renderResult() {
   const sp = speciesSummaries();
   if (sp.length) {
     const c2 = el("div", { class: "card" });
-    c2.appendChild(el("h3", { class: "blk", text: "Volume bois fort tige extrapolé par essence" }));
-    c2.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: "Volume bois fort tige (jusqu'à 7 cm de diamètre). Moyenne à l'hectare de l'essence × surface de la parcelle. La marge est celle de l'essence seule : plus large que celle du total, c'est normal." }));
+    c2.appendChild(el("h3", { class: "blk", text: "Par essence" }));
+    c2.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: "Le même calcul, essence par essence. La marge d'une essence seule est plus large que celle du total : c'est normal, elle repose sur moins d'arbres." }));
     const tw2 = el("div", { class: "tbl-wrap" });
     const t2 = el("table");
-    t2.innerHTML = "<thead><tr><th>Essence</th><th class='num'>Tiges (parcelle)</th><th class='num'>Surface terrière (m²)</th><th class='num'>Volume bois fort tige (m³)</th><th class='num'>% du volume</th><th class='num'>Marge ± E %</th></tr></thead>";
+    t2.innerHTML = "<thead><tr><th>Essence</th><th class='num'>Tiges</th><th class='num'>Surface terrière (m²)</th><th class='num'>Volume de bois (m³)</th><th class='num'>Part du volume</th><th class='num'>Marge</th></tr></thead>";
     const b2 = el("tbody");
     sp.forEach(s => {
       const st = a.perSpecies.find(x => x.name === s.name);
@@ -3699,15 +3702,15 @@ function renderResult() {
   const calcs = state.sessions.flatMap(s => s.calculations || []);
   if (calcs.length) {
     const det = el("details", { class: "acc" });
-    det.appendChild(el("summary", { text: "Comparer avec le calcul natif de l'application terrain (contrôle, non officiel)" }));
+    det.appendChild(el("summary", { text: "Comparer avec le calcul d'Arboreal (vérification)" }));
     const dv = el("div");
     dv.appendChild(el("div", {
       class: "note warn",
-      html: "<b>Valeurs de contrôle uniquement.</b> calculations.csv applique une autre convention (extrapolation directe à l'hectare, fonctions de volume suédoises m3sk/m3fub). Elles ne doivent jamais servir de résultat d'inventaire dans le rapport."
+      html: "<b>Pour vérifier seulement.</b> Arboreal fait aussi son propre calcul (fichier calculations.csv), avec des formules de volume suédoises, différentes des nôtres. Ces chiffres servent à contrôler l'import, jamais de résultat dans le rapport."
     }));
     const tw3 = el("div", { class: "tbl-wrap", style: "margin-top:12px" });
     const t3 = el("table");
-    t3.innerHTML = "<thead><tr><th>Placette</th><th>Essence (appli)</th><th class='num'>G appli (m²/ha)</th><th class='num'>G ForestEye (m²/ha)</th><th class='num'>Écart</th><th class='num'>V appli m3sk (m³/ha)</th><th class='num'>V ForestEye, bois fort tige (m³/ha)</th></tr></thead>";
+    t3.innerHTML = "<thead><tr><th>Placette</th><th>Essence (nom Arboreal)</th><th class='num'>Surface terrière Arboreal (m²/ha)</th><th class='num'>Surface terrière ForestEye (m²/ha)</th><th class='num'>Écart</th><th class='num'>Volume Arboreal, formule suédoise (m³/ha)</th><th class='num'>Volume ForestEye (m³/ha)</th></tr></thead>";
     const b3 = el("tbody");
     const ps = plotSummaries();
     calcs.forEach(c => {
@@ -3724,7 +3727,7 @@ function renderResult() {
       ]));
     });
     t3.appendChild(b3); tw3.appendChild(t3); dv.appendChild(tw3);
-    dv.appendChild(el("p", { class: "hint", style: "margin-top:10px", text: "Un écart quasi nul sur la surface terrière confirme que le diamètre est bien lu en centimètres. Un écart important sur le volume est normal : les deux méthodes ne calculent pas la même chose." }));
+    dv.appendChild(el("p", { class: "hint", style: "margin-top:10px", text: "Comment lire : si la surface terrière est presque identique des deux côtés, les diamètres ont été bien importés. Le volume, lui, diffère forcément : les deux formules ne comptent pas le même bois." }));
     det.appendChild(dv);
     cn.appendChild(det);
   }
