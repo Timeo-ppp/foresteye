@@ -1093,7 +1093,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div id="mzArboreal" class="panel" hidden>
     <div class="seg fx-mode" role="group" aria-label="Étape Arboreal" id="arbSteps">
       <button type="button" data-arb="import" aria-pressed="true">a · Importer les fichiers</button>
-      <button type="button" data-arb="heights" aria-pressed="false">b · Compléter les hauteurs</button>
+      <button type="button" data-arb="heights" aria-pressed="false">b · Vérifier les hauteurs</button>
     </div>
 
     <div id="arbImport" class="panel">
@@ -1105,7 +1105,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
           <li>Une placette Arboreal = une seule placette du plan.</li>
           <li><b>En fin de journée</b>, exportez la session et déposez les fichiers ci-dessous.</li>
         </ol>
-        <p style="margin:0">En lisière, seulement les arbres côté forêt. Arboreal mesure une hauteur par placette : elle suffit dans une plantation homogène ; sinon, complétez 2 à 3 hauteurs par placette à l'étape b.</p>
+        <p style="margin:0"><b>Hauteurs, dans Arboreal :</b> sur chaque placette, mesurez la hauteur d'<b>1 arbre par essence</b> dans une plantation homogène (même essence, même âge) : Arboreal la reporte sur les autres. Dans un peuplement mélangé ou irrégulier, mesurez <b>2 à 3 arbres par essence</b>, de grosseurs différentes (un fin, un moyen, un gros).</p>
+        <p style="margin:6px 0 0">En lisière, seulement les arbres côté forêt.</p>
       </div>
       <div class="drop" id="drop">
         <h3>Déposez l'export Arboreal</h3>
@@ -1146,7 +1147,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <div><dt>Direction de l'arbre (azimut)</dt><dd>Sert à placer l'arbre sur la carte. Debout au centre de la placette, c'est l'angle entre le nord et l'arbre, lu à la boussole : 0 = nord, 90 = est, 180 = sud, 270 = ouest. Avec le téléphone : tenez-le à plat, le haut pointé vers l'arbre, loin de tout objet en métal.</dd></div>
         <div><dt>Tronc</dt><dd>À 1,30 m du sol, côté amont si le terrain est en pente. Mesurez le tour du tronc au ruban : l'application en déduit le diamètre.</dd></div>
         <div><dt>Mesurer une hauteur</dt><dd>Reculez jusqu'à voir le pied et la cime de l'arbre, à environ la moitié de sa hauteur (10 m pour un arbre de 20 m). Mesurez votre distance au tronc, puis visez la cime et le pied avec le clinomètre ou le téléphone (vers le bas, l'angle est négatif) : l'application calcule la hauteur. Si vous devez lever la tête presque à la verticale, reculez encore.</dd></div>
-        <div><dt>Combien de hauteurs mesurer ?</dt><dd>Le tour du tronc se mesure sur tous les arbres. La hauteur, seulement sur 2 à 3 arbres par placette : un fin, un moyen, un gros. L'application en déduit la hauteur des autres d'après leur grosseur ; pour que ce soit fiable, il lui faut au moins 12 à 15 hauteurs par essence sur toute la campagne. Avec Arboreal, ces hauteurs s'ajoutent à l'étape « b · Compléter les hauteurs ». Dans une plantation où tous les arbres se ressemblent (même essence, même âge), la hauteur mesurée par Arboreal sur chaque placette suffit.</dd></div>
+        <div><dt>Combien de hauteurs mesurer ?</dt><dd>Le tour du tronc se mesure sur tous les arbres. La hauteur, seulement sur 2 à 3 arbres par placette : un fin, un moyen, un gros. L'application en déduit la hauteur des autres d'après leur grosseur ; pour que ce soit fiable, il lui faut au moins 12 à 15 hauteurs par essence sur toute la campagne. Avec Arboreal, elles se mesurent directement dans Arboreal. Dans une plantation où tous les arbres se ressemblent (même essence, même âge), la hauteur mesurée par Arboreal sur chaque placette suffit.</dd></div>
       </dl>
     </div>
   </details>
@@ -2009,12 +2010,31 @@ const HSRC_LABEL = {
 const CURVE_MIN = 3, HAUTEURS_CIBLE = 12, CURVE_ADVISED = HAUTEURS_CIBLE;
 const PROTOCOLE_H = "Mesurez la hauteur de 2 à 3 arbres de grosseurs différentes";
 let CURVES_CACHE = null;
+/* hauteur de placette Arboreal : Arboreal recopie la hauteur mesurée sur un arbre à tous les arbres
+   de la même essence de la placette. Une même valeur portée par 2 arbres ou plus d'une placette est
+   donc une hauteur partagée, pas une mesure par arbre (19/11/2026 : l'ancien test exigeait la même
+   valeur sur tous les arbres de la placette et ratait les placettes à deux essences). */
+const H_PARTAGEES = new WeakMap();
+function hauteursPartagees(ss) {
+  const c = H_PARTAGEES.get(ss);
+  if (c && c.arr === ss.trees && c.len === ss.trees.length) return c.by;
+  const by = {};
+  ss.trees.forEach(t => { if (clean(t.height_source)) return; const h = clean(t.height); if (h === "" || !(num(h) > 0)) return; const k = clean(t.sample_id) + "|" + h; by[k] = (by[k] || 0) + 1; });
+  H_PARTAGEES.set(ss, { arr: ss.trees, len: ss.trees.length, by });
+  return by;
+}
+function estHauteurPartagee(t, ss) {
+  if (clean(t.height_source)) return false;
+  const pid = clean(t.sample_id);
+  if (ss.sharedHeights && ss.sharedHeights[pid] && clean(ss.sharedHeights[pid]) === clean(t.height)) return true;
+  return (hauteursPartagees(ss)[pid + "|" + clean(t.height)] || 0) >= 2;
+}
 function isMeasuredRow(t, ss) {
   const src = clean(t.height_source);
   if (src === "clino" || src === "direct") return true;
   if (src) return false;
   if (clean(t.height) === "" || !(num(t.height) > 0)) return false;
-  return !(ss.sharedHeights && ss.sharedHeights[clean(t.sample_id)]);
+  return !estHauteurPartagee(t, ss);
 }
 function fitHeightCurve(pts) {
   const n = pts.length, res = { n, pts, kind: "none" };
@@ -2058,13 +2078,27 @@ function heightCurves() {
 /* hauteurs mesurées par essence sur toute la campagne (D9) : alerte sous 12 */
 function hauteursParEssence() {
   const cv = heightCurves();
-  return allSpeciesNames().map(nm => { const n = (cv[nm] || {}).n || 0; return { nom: nm, n, manque: Math.max(0, HAUTEURS_CIBLE - n) }; });
+  const hp = hauteursPlacetteParEssence();
+  return allSpeciesNames().map(nm => { const n = (cv[nm] || {}).n || 0; return { nom: nm, n, k: hp[nm] || 0, manque: Math.max(0, HAUTEURS_CIBLE - n) }; });
 }
 /* compteur lisible : « 14 hauteurs mesurées (minimum 12) ✓ » ou « 9 hauteurs mesurées (minimum 12, encore 3) » */
-function txtHauteurs(n) {
-  return n + " hauteur" + (n > 1 ? "s" : "") + " mesurée" + (n > 1 ? "s" : "") + " (minimum " + HAUTEURS_CIBLE + (n < HAUTEURS_CIBLE ? ", encore " + (HAUTEURS_CIBLE - n) + ")" : ") ✓");
+function txtHauteurs(n, k) {
+  const pl = k ? k + " hauteur" + (k > 1 ? "s" : "") + " de placette (1 par placette, Arboreal)" : "";
+  if (!n && k) return pl;
+  return n + " hauteur" + (n > 1 ? "s" : "") + " mesurée" + (n > 1 ? "s" : "") + " arbre par arbre (minimum " + HAUTEURS_CIBLE + (n < HAUTEURS_CIBLE ? ", encore " + (HAUTEURS_CIBLE - n) + ")" : ") ✓") + (pl ? " · " + pl : "");
+}
+/* nombre de hauteurs de placette Arboreal par essence (une par placette et par valeur) */
+function hauteursPlacetteParEssence() {
+  const vu = {}, out = {};
+  state.sessions.forEach(ss => ss.trees.forEach(t => {
+    if (!estHauteurPartagee(t, ss) || !compteSeuil(num(t.diameter))) return;
+    const fr = frNameFor(t), k = fr + "|" + ss.id + "|" + clean(t.sample_id) + "|" + clean(t.height);
+    if (vu[k]) return; vu[k] = 1; out[fr] = (out[fr] || 0) + 1;
+  }));
+  return out;
 }
 function msgHauteurs(h) {
+  if (h.manque && h.k && !h.n) return "chaque placette garde sa hauteur Arboreal : suffit en plantation homogène ; en peuplement mélangé, mesurez 2 à 3 arbres par essence et par placette";
   return h.manque ? "courbe peu fiable, mesurez encore " + h.manque + " hauteur" + (h.manque > 1 ? "s" : "") + " de cette essence" : "au moins " + HAUTEURS_CIBLE + " hauteurs : courbe calée";
 }
 function hauteursCard() {
@@ -2077,8 +2111,8 @@ function hauteursCard() {
   const liste = el("div", { class: "filelist h-liste" });
   rows.forEach(h => liste.appendChild(el("div", { class: "filerow", style: "flex-wrap:wrap; row-gap:6px" }, [
     el("span", { class: "nm", style: "flex:1 1 140px; white-space:normal" }, [el("span", { class: "swatch", style: "background:" + speciesColor(h.nom) }), el("b", { text: h.nom })]),
-    el("span", { class: "mono", text: txtHauteurs(h.n) }),
-    el("span", { class: "chip " + (h.manque ? "warn" : "ok"), style: "white-space:normal; flex:1 1 100%; border-radius:8px", text: msgHauteurs(h) })
+    el("span", { class: "mono", text: txtHauteurs(h.n, h.k) }),
+    el("span", { class: "chip " + (h.manque && !(h.k && !h.n) ? "warn" : "ok"), style: "white-space:normal; flex:1 1 100%; border-radius:8px", text: msgHauteurs(h) })
   ])));
   card.appendChild(liste);
   return card;
@@ -2290,7 +2324,7 @@ function treeEntries() {
         if (mesuree && sm.principale) hSrc = "mesuree";
         else if (curves && curves[fr] && curves[fr].kind !== "none" && isFinite(D)) { H = predictHeight(curves[fr], D); hSrc = curves[fr].kind; }
         else if (clean(t.height_source) === "estimee" && isFinite(H)) hSrc = "estimee";
-        else if (ss.sharedHeights && ss.sharedHeights[pid] && isFinite(H)) hSrc = "representative";
+        else if (estHauteurPartagee(t, ss) && isFinite(H)) hSrc = "representative";
         else hSrc = isFinite(H) ? "brute" : "manquante";
         const g = isFinite(D) ? Math.PI * D * D / 40000 : NaN;
         const V = isFinite(g) && isFinite(H) ? g * H * f : NaN;
@@ -3216,7 +3250,7 @@ function renderTrees() {
   if (estN) hw.appendChild(el("div", { class: "note info", style: "margin-bottom:10px", html: "<b>" + estN + " hauteur(s) estimée(s) par la courbe de hauteur</b> à partir de " + trees.filter(t => t.hSrc === "mesuree").length + " arbre(s) mesuré(s). Détail de la courbe sous le tableau." }));
   if (sharedN) hw.appendChild(el("div", {
     class: "note info",
-    html: "<b>Une hauteur par placette pour " + sharedN + " arbres.</b> Arboreal mesure une hauteur représentative de la placette et la reporte sur tous ses arbres. C'est adapté à une plantation homogène (même essence, même âge) : les volumes sont valables, avec cette limite à signaler, la variation des hauteurs à l'intérieur d'une placette n'est pas mesurée. Dans un peuplement mélangé, complétez quelques hauteurs (2 · Mesurer, Arboreal, étape b)."
+    html: "<b>Une hauteur par placette pour " + sharedN + " arbres.</b> Arboreal mesure une hauteur représentative de la placette et la reporte sur tous ses arbres. C'est adapté à une plantation homogène (même essence, même âge) : les volumes sont valables, avec cette limite à signaler, la variation des hauteurs à l'intérieur d'une placette n'est pas mesurée. Dans un peuplement mélangé, mesurez 2 à 3 arbres par essence et par placette dans Arboreal."
   }));
 
   const tb = $("#tblTrees tbody"); tb.innerHTML = "";
@@ -5299,15 +5333,16 @@ function renderFxHeights(body) {
   sel.addEventListener("change", () => { state.field.hPlot = sel.value; state.field.hTree = null; renderTerrain(); persist(); });
 
   const intro = el("div", { class: "card" }, [
-    el("h3", { class: "blk", text: "Compléter les hauteurs d'une placette" }),
-    el("p", { class: "hint", style: "margin:4px 0 12px", text: "Les diamètres et positions viennent d'Arboreal. Mesurez ici la hauteur de quelques arbres bien visibles par essence : la courbe de hauteur estime ensuite tous les autres." }),
+    el("h3", { class: "blk", text: "Vérifier les hauteurs reçues d'Arboreal" }),
+    el("p", { class: "hint", style: "margin:4px 0 12px", text: "Les hauteurs se mesurent dans Arboreal (voir a). Ici, vérifiez ce qui a été reçu, placette par placette. S'il manque une hauteur, vous pouvez encore la mesurer au clinomètre en choisissant l'arbre ci-dessous." }),
     el("label", { class: "f", for: "fxHPlot" }, ["Placette", sel])
   ]);
   const spRows = el("div", { class: "fx-sens", style: "margin-top:12px" });
+  const hpB = hauteursPlacetteParEssence();
   Array.from(new Set(items.map(o => frNameFor(o.t)))).sort((a, b) => a.localeCompare(b, "fr")).forEach(fr => {
-    const n = (curves[fr] && curves[fr].n) || 0;
-    const cls = n >= HAUTEURS_CIBLE ? "ok" : "warn";
-    spRows.appendChild(el("span", { class: "chip " + cls }, [el("span", { class: "dot" }), document.createTextNode(fr + " : " + txtHauteurs(n))]));
+    const n = (curves[fr] && curves[fr].n) || 0, k = hpB[fr] || 0;
+    const cls = n >= HAUTEURS_CIBLE || (k && !n) ? "ok" : "warn";
+    spRows.appendChild(el("span", { class: "chip " + cls }, [el("span", { class: "dot" }), document.createTextNode(fr + " : " + txtHauteurs(n, k))]));
   });
   intro.appendChild(spRows);
   intro.appendChild(el("p", { class: "hint", style: "margin:8px 0 0", text: "Compteurs sur l'ensemble des placettes : la courbe d'une essence se construit avec les mesures de toutes les sorties." }));
