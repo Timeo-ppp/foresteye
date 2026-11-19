@@ -3196,7 +3196,7 @@ function renderEssences() {
     ]));
   });
   $("#coefNote").textContent = NOTE_COEFS;
-  const eh = $("#essHauteurs"); eh.innerHTML = ""; const hc = hauteursCard(); if (hc) eh.appendChild(hc);
+  const eh = $("#essHauteurs"); eh.innerHTML = "";   // 19/11/2026 : hauteurs retirées de Essences (restent dans Résultat)
   const mig = $("#coefMigration"); mig.innerHTML = "";
   if (state.ui.migration) mig.appendChild(el("div", { class: "note info", style: "margin-bottom:12px" }, [
     el("span", { html: "<b>" + MSG_COEFS_MAJ + ".</b> " + fxEsc(state.ui.migration.changes.length ? state.ui.migration.changes.join(" ; ") + ". " : "") + "Les coefficients modifiés à la main sont gardés tels quels. " }),
