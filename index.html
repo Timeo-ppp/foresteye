@@ -1221,7 +1221,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" hidden>
     <h3 class="blk">Précision visée</h3>
     <div class="row" style="margin-top:12px">
       <label class="f" for="confLevel" hidden><span>Niveau de confiance <button class="helpdot" type="button" data-aide="Probabilité que la vraie valeur soit dans l'intervalle annoncé. À 90 % (par défaut), une fois sur dix la vraie valeur est en dehors.">?</button></span>
@@ -1310,22 +1310,22 @@ input.fx-big{font-size:18px; padding:10px 12px}
   </div>
 
   <div class="card">
-    <h3 class="blk">Temps de terrain : hypothèses ajustables <button class="helpdot" type="button" data-aide="Sert à estimer la durée de la campagne avant de partir : nombre de placettes × durée par placette, plus la marche entre placettes. En inventaire en plein : nombre d'arbres attendu × durée par arbre. Les durées sont celles de l'équipe indiquée.">?</button></h3>
+    <h3 class="blk">Temps de terrain <button class="helpdot" type="button" data-aide="Sert à estimer la durée de la campagne avant de partir : nombre de placettes × durée par placette, plus la marche entre placettes. En inventaire en plein : nombre d'arbres attendu × durée par arbre. Les durées sont celles de l'équipe indiquée.">?</button></h3>
     <div class="row" style="margin-top:12px">
       <label class="f">Durée par placette (min)
         <input type="number" id="tpsMinP" min="1" step="1" style="width:100px">
       </label>
-      <label class="f">Marche en forêt (km/h)
+      <label class="f" hidden>Marche en forêt (km/h)
         <input type="number" id="tpsKmh" min="0.5" step="0.5" style="width:100px">
       </label>
-      <label class="f">Terrain par jour (h)
+      <label class="f" hidden>Terrain par jour (h)
         <input type="number" id="tpsHJ" min="1" step="0.5" style="width:100px">
       </label>
       <label class="f">Équipe (personnes)
         <input type="number" id="tpsPers" min="1" step="1" style="width:100px">
       </label>
     </div>
-    <div class="row" style="margin-top:12px">
+    <div class="row" style="margin-top:12px" id="tpsPleinRow">
       <label class="f">Inventaire en plein : durée par arbre (min)
         <input type="number" id="tpsMinA" min="0.5" step="0.5" style="width:100px">
       </label>
@@ -1335,7 +1335,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
       </label>
     </div>
     <div id="tpsCalib" style="margin-top:12px; display:flex; flex-direction:column; gap:8px"></div>
-    <p class="hint" style="margin:10px 0 0">Valeurs de départ : 30 min par placette, marche en forêt à 2 km/h, 6 h de terrain par jour, 2 personnes, 2 min par arbre en inventaire en plein. Dès que des sorties sont enregistrées, la durée réelle d'une placette est calculée d'après les horodatages et peut remplacer la valeur de départ.</p>
+    <p class="hint" style="margin:10px 0 0">Sert à estimer la durée de la sortie dans 1 · Préparer. Valeurs de départ : 30 min par placette, 2 personnes (marche entre placettes à 2 km/h, 6 h de terrain par jour). Dès que des sorties sont enregistrées, la durée réelle d'une placette est calculée d'après les horodatages et peut remplacer la valeur de départ.</p>
   </div>
 
   <div id="backupBox"></div>
@@ -3123,6 +3123,7 @@ function renderParcelle() {
   const th = tempsHyp();
   $("#tpsMinP").value = th.minP; $("#tpsKmh").value = th.kmh; $("#tpsHJ").value = th.hJ; $("#tpsPers").value = th.pers; $("#tpsMinA").value = th.minA;
   $("#tpsDens").value = num(state.config.densitePlein) > 0 ? num(state.config.densitePlein) : "";
+  $("#tpsPleinRow").hidden = !enPlein();
   const cal = $("#tpsCalib"); cal.innerHTML = "";
   const pv = dureesParVoie();
   Object.keys(pv).forEach(v => cal.appendChild(el("span", { class: "hint", text: "Mesuré, " + VOIE_NOM[v].toLowerCase() + " : " + (pv[v].n ? fmt(pv[v].moy, 0) + " min en moyenne sur " + pluriel(pv[v].n, "placette") : "aucune placette exploitable") + (pv[v].ecartees ? " (" + pluriel(pv[v].ecartees, "placette") + " reprise" + (pv[v].ecartees > 1 ? "s" : "") + " plus tard, écartée" + (pv[v].ecartees > 1 ? "s" : "") + ")" : "") + "." })));
@@ -6002,9 +6003,6 @@ function blocCompleter(e) {
     box.appendChild(el("p", { class: "hint", style: "margin:0", text: "Le seuil se règle dans Réglages." }));
     return box;
   }
-  const objIn = el("input", { id: "plObjE", type: "number", min: "1", max: "50", step: "1", value: String(th), style: "width:70px", "aria-label": "Marge visée (%)" });
-  objIn.addEventListener("change", () => { const v = num(objIn.value); if (v >= 1 && v <= 50) { state.config.threshold = v; persist(); renderAll(); } });
-  box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px" }, [el("span", { text: "Précision visée : ±" }), objIn, el("span", { text: "% sur le volume (confiance " + cf + " %)." })]));
   const eNow = margeAttendue(e.m.cv, e.m.base, Npop), eGoal = e.cur ? e.cur.n : NaN;
   const lignes = [];
   lignes.push("Variabilité mesurée entre placettes : <b>" + fmt(e.m.cv * 100, 0) + " %</b> (sur " + e.m.base + " placettes mesurées), marge actuelle ± " + fmt(eNow, 1) + " %.");
@@ -6159,6 +6157,10 @@ function estimateBlock(opts) {
   const plan = state.plan, th = fmt(state.config.threshold, 0), cf = fmt(state.config.conf * 100, 0);
   const box = el("div", { class: "card-lite est", style: "display:flex; flex-direction:column; gap:8px" });
   box.appendChild(el("b", { text: "Combien de placettes mesurer ?" }));
+  // 19/11/2026 : la précision visée se règle ici, avant comme après les premières mesures
+  const objIn = el("input", { id: "plObjE", type: "number", min: "1", max: "50", step: "1", value: String(state.config.threshold), style: "width:70px", "aria-label": "Précision visée (± %)" });
+  objIn.addEventListener("change", () => { const v = num(objIn.value); if (v >= 1 && v <= 50) { state.config.threshold = v; persist(); renderAll(); } });
+  box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px; flex-wrap:wrap" }, [el("span", { text: "Précision visée : ±" }), objIn, el("span", { text: "% sur le volume (confiance " + cf + " %)" }), el("span", { class: "hint", text: "± 15 % conseillé, ± 10 % pour une vente de bois" })]));
   // estimation de départ, variabilité supposée réglable
   const cvIn = el("input", { id: "plCvPrior", type: "number", min: "5", max: "150", step: "5", value: String(Math.round(e.cvPrior * 100)), style: "width:78px", "aria-label": "Variabilité supposée entre placettes (%)" });
   cvIn.addEventListener("change", () => { const v = num(cvIn.value); if (v >= 5 && v <= 150) { plan.cvPrior = v; renderAll(); } });
@@ -7054,7 +7056,7 @@ function restore() {
 let renderScheduled = false;
 function renderAll(goImport, report) {
   // 19/11/2026 : réglages retirés de l'écran, figés sur les valeurs recommandées
-  Object.assign(state.config, { conf: 0.90, fpc: true, heightMode: "courbe", areaMode: "real", showFP: false });
+  Object.assign(state.config, { conf: 0.90, fpc: true, heightMode: "courbe", areaMode: "real", showFP: false, tpsVitesseKmh: CONFIG_DEFAULT.tpsVitesseKmh, tpsHeuresJour: CONFIG_DEFAULT.tpsHeuresJour });
   CURVES_CACHE = null;
   $("#cntSess").textContent = String(state.sessions.length);
   $("#cntTrees").textContent = String(allTrees().length);
