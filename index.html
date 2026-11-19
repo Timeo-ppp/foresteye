@@ -3586,7 +3586,8 @@ function renderResult() {
       : "Extrapolation des placettes mesurées à la parcelle entière.";
   $("#resultSubtitle").textContent += (/\.$/.test($("#resultSubtitle").textContent) ? " " : " · ") + SEUIL_TXT.charAt(0).toUpperCase() + SEUIL_TXT.slice(1) + ".";
   const sousSeuil = excludedStems().length;
-  if (sousSeuil) g.appendChild(el("div", { class: "note", html: "<b>" + (sousSeuil > 1 ? sousSeuil + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") + ".</b> Seuil de l'inventaire forestier national IGN (circonférence 23,5 cm à 1,30 m) : ces tiges restent dans le projet, mais n'entrent dans aucun total." }));
+  // 19/11/2026 : note retirée de Résultat à la demande de Timéo (les tiges sous le seuil restent listées dans Arbres)
+  if (false && sousSeuil) g.appendChild(el("div", { class: "note", html: "<b>" + (sousSeuil > 1 ? sousSeuil + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") + ".</b> Seuil de l'inventaire forestier national IGN (circonférence 23,5 cm à 1,30 m) : ces tiges restent dans le projet, mais n'entrent dans aucun total." }));
 
   if (plein ? !a.nTrees : !a.nPlots) {
     g.appendChild(el("div", { class: "empty" }, [
