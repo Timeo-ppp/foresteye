@@ -1139,14 +1139,19 @@ input.fx-big{font-size:18px; padding:10px 12px}
       <ol style="margin:6px 0 8px; padding-left:20px">
         <li><b>Démarrez une sortie</b> : une par journée de terrain.</li>
         <li><b>Pour chaque placette</b> : choisissez-la, rejoignez son centre avec « Me guider », relevez la position (1 min), puis « Ouvrir la placette ».</li>
-        <li><b>Saisissez chaque arbre</b> : essence, tour du tronc au ruban, distance au centre. La direction (azimut) est facultative : elle sert à placer l'arbre sur la carte.</li>
-        <li><b>Hauteur</b> : seulement sur 2 à 3 arbres par placette (un fin, un moyen, un gros). L'application estime les autres.</li>
-        <li>Le plan de la placette montre les arbres déjà saisis : vérifiez qu'aucun n'est oublié, puis passez à la placette suivante.</li>
+        <li><b>a · Troncs</b> : pour chaque arbre, essence, tour du tronc au ruban et distance au centre. La direction (azimut) est facultative : elle sert à placer l'arbre sur la carte.</li>
+        <li><b>b · Hauteurs</b> : une fois tous les troncs de la placette mesurés, l'application désigne 2 à 3 arbres (un fin, un moyen, un gros) : mesurez leur hauteur au clinomètre. Elle estime ensuite celle des autres.</li>
+        <li>Clôturez la placette, puis passez à la suivante.</li>
         <li><b>En fin de journée</b> : « Terminer la sortie », puis « Sauvegarder » pour garder une copie du projet.</li>
       </ol>
       <p style="margin:0">Les capteurs du téléphone (GPS, boussole, inclinomètre) pré-remplissent la position, la direction et les angles de hauteur. Sans eux, tapez les valeurs lues sur vos instruments.</p>
     </div>
+    <div class="seg fx-mode" role="group" aria-label="Étape de la saisie manuelle" id="fxSteps" style="margin-top:12px">
+      <button type="button" data-fx="arbres" aria-pressed="true">a · Troncs</button>
+      <button type="button" data-fx="heights" aria-pressed="false">b · Hauteurs</button>
+    </div>
     <div id="fxBody" class="panel"></div>
+    <div id="fxHBodyM" class="panel" hidden></div>
   </div>
 
   <div id="voieNone" class="empty">Choisissez ci-dessus la façon de mesurer.</div>
@@ -4497,7 +4502,8 @@ function fxOpenPlot(o) {
 function fxTreeRow(d, plot, prev) {
   const D = fxDiameter(d.trunk, d.trunkMode);
   const zone = isZoneRow(plot);   // inventaire en plein : pas de position relevée, le carré éventuel suffit
-  const loc = zone ? null : fxLocal(d.dist, d.az);
+  const sansAz = clean(d.az) === "" || !isFinite(num(d.az));   // azimut facultatif (19/11/2026) : sans lui, pas de position
+  const loc = zone || sansAz ? null : fxLocal(d.dist, d.az);
   const lat = num(plot.latitude), lon = num(plot.longitude);
   let glat = "", glon = "";
   if (loc && isFinite(lat) && isFinite(lon)) {
@@ -4512,7 +4518,7 @@ function fxTreeRow(d, plot, prev) {
     diameter: D.toFixed(1), trunk_input: String(num(d.trunk)), trunk_mode: d.trunkMode,
     height: isFinite(d.H) ? d.H.toFixed(1) : "", height_source: isFinite(d.H) ? d.hSrc : "",
     clino_l: d.hSrc === "clino" ? String(num(d.L)) : "", clino_top: d.hSrc === "clino" ? String(num(d.top)) : "", clino_foot: d.hSrc === "clino" ? String(num(d.foot)) : "",
-    distance: zone ? "" : String(num(d.dist)), azimuth: zone ? "" : String(num(d.az)), bearing_to_north: zone ? "" : String(num(d.az)),
+    distance: zone ? "" : String(num(d.dist)), azimuth: zone || sansAz ? "" : String(num(d.az)), bearing_to_north: zone || sansAz ? "" : String(num(d.az)),
     carre: zone ? clean(d.carre) : "",
     // cépée : les tiges suivantes renvoient à la première (la souche) et portent leur rang
     souche_id: d.soucheId != null ? String(d.soucheId) : prev ? clean(prev.souche_id) : "",
@@ -4765,8 +4771,11 @@ function renderMesurer() {
   }
   const hb = $("#fxHBody"); hb.innerHTML = "";
   if (voie === "arboreal" && arbStep === "heights") renderFxHeights(hb);
-  const fb = $("#fxBody"); fb.innerHTML = "";
-  if (voie === "foresteye") renderFxFull(fb);
+  const fxStep = state.ui.fxStep === "heights" ? "heights" : "arbres";
+  $$("#fxSteps button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.fx === fxStep)));
+  const fb = $("#fxBody"); fb.innerHTML = ""; fb.hidden = fxStep !== "arbres";
+  const hm = $("#fxHBodyM"); hm.innerHTML = ""; hm.hidden = fxStep !== "heights";
+  if (voie === "foresteye") { if (fxStep === "heights") renderFxHeights(hm, { manuel: true }); else renderFxFull(fb); }
 }
 function renderFxFull(body) {
   const ss = fieldSession();
@@ -5037,7 +5046,7 @@ function fxValidate(f, plot) {
   if (!zone) {
     if (!isFinite(dist) || dist < 0) errs.push("Saisissez la distance au centre de la placette.");
     else if (dist > r) errs.push("À " + fmt(dist, 2) + " m, l'arbre est hors de la placette (rayon " + fmt(r, 2) + " m) : il ne doit pas être compté.");
-    if (!isFinite(az) || az < 0 || az > 360) errs.push("Saisissez un azimut entre 0 et 360°.");
+    if (clean(f.az) !== "" && (!isFinite(az) || az < 0 || az > 360)) errs.push("Azimut entre 0 et 360°, ou laissez vide (l'arbre ne sera pas placé sur la carte).");
   } else if (f.carre && !CARRES.includes(f.carre)) errs.push("Carré inconnu : choisissez de A1 à E5.");
   let H = NaN, hSrc = "";
   if (f.hMode === "clino") {
@@ -5134,6 +5143,10 @@ function renderFxPlot(body, ss, plot) {
   const seg = (opts, cur, on) => el("div", { class: "seg" }, opts.map(([v, t]) => el("button", { type: "button", "aria-pressed": String(cur === v), text: t, onclick: () => on(v) })));
   const reRender = () => { fxSaveDraft(); renderTerrain(); };
 
+  // 19/11/2026 : la hauteur se mesure après les troncs, sur les arbres désignés (b · Hauteurs) ;
+  // le bloc ne reste que pour modifier un arbre dont la hauteur a déjà été saisie ici
+  const hDansForm = !!(editing && (state.field.hMode === "clino" || state.field.hMode === "direct"));
+  if (!hDansForm) state.field.hMode = "later";
   state.field.trunk = "circ";   // saisie au ruban uniquement (19/11/2026) ; un arbre saisi au compas est repris en circonférence
   const trunkLab = state.field.trunk === "circ" ? "Circonférence à 1,30 m (cm)" : "Diamètre à 1,30 m (cm)";
   const hBlock = el("div", { style: "display:flex; flex-direction:column; gap:10px" });
@@ -5180,7 +5193,7 @@ function renderFxPlot(body, ss, plot) {
       el("h4", null, [document.createTextNode("Position depuis le centre"), el("span", { class: "rd", id: "fxPosRead" })]),
       el("div", { class: "fx-grid" }, [
         fxField("fxDist", "Distance au centre du tronc (m)", { step: "0.01", min: "0", value: d.dist || "" }),
-        el("label", { class: "f", for: "fxAz" }, ["Azimut (°)", el("div", { class: "fx-in" }, [
+        el("label", { class: "f", for: "fxAz" }, ["Azimut (°, facultatif)", el("div", { class: "fx-in" }, [
           el("input", { id: "fxAz", type: "text", inputmode: "numeric", autocomplete: "off", value: d.az || "" }),
           el("button", {
             class: "btn", type: "button", text: "Boussole", onclick: async () => {
@@ -5191,11 +5204,10 @@ function renderFxPlot(body, ss, plot) {
         ])])
       ])
     ]),
-    el("div", { class: "fx-step" }, [
+    hDansForm ? el("div", { class: "fx-step" }, [
       el("h4", null, [document.createTextNode("Hauteur"), el("span", { class: "rd", id: "fxHRead" })]),
-      seg([["clino", "Clinomètre"], ["direct", "Saisie directe"], ["later", "Plus tard"]], state.field.hMode, v => { state.field.hMode = v; reRender(); }),
       hBlock
-    ]),
+    ]) : el("span", { id: "fxHRead", hidden: true }),
     el("div", { class: "fx-step" }, [
       el("h4", { text: "Observations" }),
       el("label", { style: "display:flex; gap:8px; align-items:center; font-size:14px" }, [el("input", { id: "fxDmg", type: "checkbox", checked: !!d.dmg }), document.createTextNode("Arbre abîmé ou dépérissant")]),
@@ -5264,7 +5276,8 @@ function renderFxPlot(body, ss, plot) {
     el("div", { class: "card" }, [el("h3", { class: "blk", text: "Arbres saisis" }), list]),
     el("div", { class: "card" }, [
       el("h3", { class: "blk", text: zone ? "Fin du comptage" : "Fin de placette" }),
-      noH ? el("p", { class: "hint", style: "margin:4px 0 10px", text: noH + " tige(s) sans hauteur mesurée : leur hauteur sera estimée par la courbe hauteur-diamètre de l'essence. Protocole : 2 à 3 hauteurs par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne." }) : el("p", { class: "hint", style: "margin:4px 0 10px", text: "Toutes les tiges ont une hauteur mesurée." }),
+      zone ? null : el("p", { class: "hint", style: "margin:4px 0 10px", text: "Tous les troncs sont mesurés ? Mesurez maintenant la hauteur des arbres désignés par l'application (2 à 3 par placette)." }),
+      zone ? null : el("div", { class: "row", style: "margin-bottom:8px" }, [el("button", { class: "btn", type: "button", text: "b · Mesurer les hauteurs de cette placette", onclick: () => { state.ui.fxStep = "heights"; state.field.hPlot = clean(plot.sample_id); state.field.hTree = null; renderTerrain(); window.scrollTo({ top: 0 }); } })]),
       el("div", { class: "row" }, [
         el("button", { class: "btn primary", type: "button", text: zone ? "Fermer la zone" : "Clôturer la placette", onclick: () => { state.field.openPlot = null; state.field.editing = null; state.field.draft = {}; fxWake(false); renderAll(); toast(zone ? "Zone fermée : le comptage peut reprendre plus tard" : "Placette " + label + " clôturée"); } })
       ])
@@ -5333,17 +5346,26 @@ function fxAdvised(items) {
     if (have >= HAUTEURS_CIBLE) return;
     const free = by[fr].filter(o => !isMeasuredRow(o.t, o.ss) && num(o.t.diameter) > 0).sort((a, b) => num(a.t.diameter) - num(b.t.diameter));
     if (!free.length) return;
-    const want = Math.min(free.length, 3);
-    for (let i = 0; i < want; i++) adv.add(free[Math.round(i * (free.length - 1) / Math.max(1, want - 1))].t);
+    // 3 hauteurs par essence et par placette : celles déjà mesurées ici comptent
+    const dejaIci = by[fr].length - free.length;
+    const want = Math.min(free.length, Math.max(0, 3 - dejaIci));
+    if (!want) return;
+    // cibles fixes sur toute la placette : le plus fin, un moyen, le plus gros ; on ne désigne que celles pas encore mesurées
+    const tous = by[fr].filter(o => num(o.t.diameter) > 0).sort((a, b) => num(a.t.diameter) - num(b.t.diameter));
+    const nC = Math.min(3, tous.length), cibles = [];
+    for (let i = 0; i < nC; i++) { const o = tous[Math.round(i * (tous.length - 1) / Math.max(1, nC - 1))]; if (!cibles.includes(o)) cibles.push(o); }
+    cibles.filter(o => free.includes(o)).slice(0, want).forEach(o => adv.add(o.t));
   });
   return adv;
 }
-function renderFxHeights(body) {
-  const plots = allPlots().filter(p => fxHeightTrees(p.id).length);
+function renderFxHeights(body, opts) {
+  const manuel = !!(opts && opts.manuel);
+  const plots = allPlots().filter(p => (!manuel || p.raw.field) && fxHeightTrees(p.id).length);
   if (!plots.length) {
-    body.appendChild(el("div", { class: "empty", text: "Aucune placette avec des arbres. Importez d'abord les fichiers d'Arboreal Forest (étape a · Importer les fichiers)." }));
+    body.appendChild(el("div", { class: "empty", text: manuel ? "Aucune placette avec des arbres. Mesurez d'abord les troncs (a · Troncs)." : "Aucune placette avec des arbres. Importez d'abord les fichiers d'Arboreal Forest (étape a · Importer les fichiers)." }));
     return;
   }
+  if (manuel) state.field.hMode2 = "clino";
   if (!plots.some(p => p.id === state.field.hPlot)) state.field.hPlot = plots[0].id;
   const p = plots.find(x => x.id === state.field.hPlot);
   const items = fxHeightTrees(p.id);
@@ -5356,8 +5378,8 @@ function renderFxHeights(body) {
   sel.addEventListener("change", () => { state.field.hPlot = sel.value; state.field.hTree = null; renderTerrain(); persist(); });
 
   const intro = el("div", { class: "card" }, [
-    el("h3", { class: "blk", text: "Vérifier les hauteurs reçues d'Arboreal" }),
-    el("p", { class: "hint", style: "margin:4px 0 12px", text: "Les hauteurs se mesurent dans Arboreal (voir a). Ici, vérifiez ce qui a été reçu, placette par placette. S'il manque une hauteur, vous pouvez encore la mesurer au clinomètre en choisissant l'arbre ci-dessous." }),
+    el("h3", { class: "blk", text: manuel ? "Mesurer les hauteurs" : "Vérifier les hauteurs reçues d'Arboreal" }),
+    el("p", { class: "hint", style: "margin:4px 0 12px", text: manuel ? "Une fois tous les troncs de la placette mesurés, l'application désigne 2 à 3 arbres par essence, de grosseurs différentes (« à mesurer » dans la liste) : mesurez leur hauteur au clinomètre. Elle estime ensuite la hauteur des autres." : "Les hauteurs se mesurent dans Arboreal (voir a). Ici, vérifiez ce qui a été reçu, placette par placette. S'il manque une hauteur, vous pouvez encore la mesurer au clinomètre en choisissant l'arbre ci-dessous." }),
     el("label", { class: "f", for: "fxHPlot" }, ["Placette", sel])
   ]);
   const spRows = el("div", { class: "fx-sens", style: "margin-top:12px" });
@@ -5403,7 +5425,7 @@ function renderFxHeights(body) {
       el("p", { class: "hint", style: "margin:2px 0 6px", text: "D " + fmt(num(t.diameter), 1) + " cm" + (isMeasuredRow(t, cur.ss) ? " · hauteur mesurée " + fmt(num(t.height), 1) + " m" : " · hauteur non mesurée") }),
       el("div", { class: "fx-step" }, [
         el("h4", null, [document.createTextNode("Hauteur"), read]),
-        el("div", { class: "seg" }, [["clino", "Clinomètre"], ["direct", "Saisie directe"]].map(([v, lab]) => el("button", { type: "button", "aria-pressed": String(mode === v), text: lab, onclick: () => { state.field.hMode2 = v; state.field.hDraft = {}; renderTerrain(); } }))),
+        manuel ? null : el("div", { class: "seg" }, [["clino", "Clinomètre"], ["direct", "Saisie directe"]].map(([v, lab]) => el("button", { type: "button", "aria-pressed": String(mode === v), text: lab, onclick: () => { state.field.hMode2 = v; state.field.hDraft = {}; renderTerrain(); } }))),
         blk
       ]),
       err,
@@ -5442,7 +5464,7 @@ function renderFxHeights(body) {
       el("span", { class: "n", text: String(i + 1) }),
       el("div", { style: "min-width:0" }, [
         el("div", null, [el("span", { class: "swatch", style: "background:" + speciesColor(frNameFor(t)) }), el("b", { text: frNameFor(t) }),
-          adv.has(t) ? el("span", { class: "chip ok", style: "margin-left:8px", text: "conseillé" }) : null]),
+          adv.has(t) ? el("span", { class: "chip ok", style: "margin-left:8px", text: "à mesurer" }) : null]),
         el("div", { class: "m", text: "D " + fmt(num(t.diameter), 1) + " cm · " + (meas ? "H mesurée " + fmt(num(t.height), 1) + " m" : "H non mesurée") })
       ]),
       el("div", { class: "acts" }, el("button", { class: "btn sm" + (meas ? " ghost" : ""), type: "button", text: meas ? "Modifier" : "Mesurer", onclick: () => { state.field.hTree = t.tree_id; state.field.hDraft = {}; renderTerrain(); window.scrollTo({ top: 0 }); } }))
@@ -5455,7 +5477,7 @@ function renderFxHeights(body) {
     el("div", { class: "card" }, [el("h3", { class: "blk", text: "Plan de la placette" }),
       el("p", { class: "hint", style: "margin:2px 0 10px", text: field ? "Nord en haut." : "Repère d'Arboreal, non orienté : retrouvez l'arbre grâce aux numéros, à sa position relative et à son diamètre." }), planBox]),
     el("div", { class: "card" }, [el("h3", { class: "blk", text: "Arbres de la placette" }),
-      el("p", { class: "hint", style: "margin:2px 0 8px", text: "« Conseillé » : arbres de diamètres variés, utiles pour bien caler la courbe. Choisissez de préférence ceux dont le sommet est visible." }), list])
+      el("p", { class: "hint", style: "margin:2px 0 8px", text: "« À mesurer » : arbres désignés par l'application, de grosseurs variées. Si le sommet de l'un d'eux n'est pas visible, prenez un arbre voisin de grosseur proche." }), list])
   ]);
   if (!cur) left.appendChild(right.firstChild);
   body.appendChild(el("div", { class: "fx-layout" }, [left, right]));
@@ -7088,6 +7110,7 @@ function wire() {
 
   // 2 · Mesurer : façon de mesurer, étapes Arboreal
   $$(".voie").forEach(b => b.addEventListener("click", () => setVoie(b.dataset.voie)));
+  $$("#fxSteps button").forEach(b => b.addEventListener("click", () => { state.ui.fxStep = b.dataset.fx; state.field.hTree = null; renderMesurer(); }));
   $$("#arbSteps button").forEach(b => b.addEventListener("click", () => { state.ui.arbStep = b.dataset.arb; state.field.hTree = null; renderMesurer(); }));
 
   // parcelle
