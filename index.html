@@ -1029,11 +1029,11 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <button class="tab" role="tab" data-t="mesurer" aria-selected="false">2 · Mesurer<span class="cnt" id="cntSess">0</span></button>
     <button class="tab" role="tab" data-t="resultat" aria-selected="false">3 · Résultat</button>
     <button class="tab" role="tab" data-t="carte" aria-selected="false">Carte</button>
-    <button class="tab" role="tab" data-t="exports" aria-selected="false">Exports</button>
-    <span class="tab-sep" aria-hidden="true">Détails</span>
-    <button class="tab" role="tab" data-t="arbres" aria-selected="false">Arbres<span class="cnt" id="cntTrees">0</span></button>
-    <button class="tab" role="tab" data-t="synthese" aria-selected="false">Synthèse</button>
-    <button class="tab" role="tab" data-t="stats" aria-selected="false">Précision</button>
+    <button class="tab" role="tab" data-t="exports" aria-selected="false" hidden>Exports</button>
+    <span class="tab-sep" aria-hidden="true">Plus</span>
+    <button class="tab" role="tab" data-t="arbres" aria-selected="false" hidden>Arbres<span class="cnt" id="cntTrees">0</span></button>
+    <button class="tab" role="tab" data-t="synthese" aria-selected="false" hidden>Synthèse</button>
+    <button class="tab" role="tab" data-t="stats" aria-selected="false" hidden>Précision</button>
     <button class="tab" role="tab" data-t="essences" aria-selected="false">Essences</button>
     <button class="tab" role="tab" data-t="parcelle" aria-selected="false">Réglages</button>
     <button class="tab" role="tab" data-t="aide" aria-selected="false">Aide</button>
@@ -1619,7 +1619,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <div><dt>Objectif de précision : la norme ForestEye</dt><dd>Une marge de <b>± 15 % au plus sur le volume, avec 90 % de confiance</b> : « ± 15 % (confiance 90 %) ». C'est assez précis pour qu'un propriétaire connaisse ce qu'il a, et faisable en une demi-journée à deux. Visez <b>± 10 %</b> seulement si le chiffre sert à une décision d'argent (vente de bois, estimation d'une coupe) : il faut environ deux fois plus de placettes. Descendre sous ± 10 % est inutile : les erreurs que la marge ne compte pas (coefficients de forme, hauteurs estimées, mesures) sont du même ordre. Diviser la marge par 2 demande 4 fois plus de placettes. Les deux chiffres se règlent dans Réglages. Une marge de ± 15 % ne veut pas dire « fiable à 85 % » : elle dit de combien le résultat peut s'écarter de la vraie valeur.</dd></div>
         <div><dt>Combien de placettes ?</dt><dd>L'étape 1 · Préparer l'estime dès que la forêt est délimitée : <span class="formula">n = (t × CV / E)²</span>, CV étant la variabilité du volume entre placettes et E la marge visée. Avant toute mesure, CV est une hypothèse (50 % par défaut) ; dès 2 placettes mesurées, la variabilité réelle la remplace et l'application signale si l'estimation change. Sur une petite forêt, le nombre est corrigé par <span class="formula">n / (1 + n / N)</span>, N étant le nombre de placettes que contient la forêt.</dd></div>
         <div><dt>Comment réduire la marge ?</dt><dd>Ajouter des placettes : la marge décroît comme 1/√n. L'étape 1 · Préparer calcule le nombre de placettes nécessaire dès que deux placettes sont mesurées, donne la marge attendue pour un nombre donné et ajoute au plan les placettes manquantes, dans les zones les moins couvertes, sans déplacer celles déjà mesurées. Séparer les essences ne rend pas le total plus précis. Si la forêt a des zones nettement différentes (une peupleraie et une chênaie, par exemple), on peut en faire deux inventaires séparés, un par zone.</dd></div>
-        <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse ; la Synthèse compare Arboreal et la saisie manuelle.</dd></div>
+        <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse (bouton « Utiliser la durée mesurée » dans 1 · Préparer).</dd></div>
       </dl>
     </div>
   </div>
@@ -7073,7 +7073,9 @@ function renderAll(goImport, report) {
   persist();
   if (goImport && report) showTab("mesurer");
 }
+const ONGLETS_RETIRES = ["exports", "arbres", "synthese", "stats"];   // 19/11/2026 : retirés pour l'utilisateur
 function showTab(t) {
+  if (ONGLETS_RETIRES.includes(t)) t = "resultat";
   state.ui.tab = t;
   $$(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === t)));
   ["preparer", "mesurer", "parcelle", "essences", "arbres", "synthese", "stats", "resultat", "carte", "exports", "aide"]
