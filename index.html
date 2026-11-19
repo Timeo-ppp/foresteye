@@ -2060,6 +2060,10 @@ function hauteursParEssence() {
   const cv = heightCurves();
   return allSpeciesNames().map(nm => { const n = (cv[nm] || {}).n || 0; return { nom: nm, n, manque: Math.max(0, HAUTEURS_CIBLE - n) }; });
 }
+/* compteur lisible : « 14 hauteurs mesurées (minimum 12) ✓ » ou « 9 hauteurs mesurées (minimum 12, encore 3) » */
+function txtHauteurs(n) {
+  return n + " hauteur" + (n > 1 ? "s" : "") + " mesurée" + (n > 1 ? "s" : "") + " (minimum " + HAUTEURS_CIBLE + (n < HAUTEURS_CIBLE ? ", encore " + (HAUTEURS_CIBLE - n) + ")" : ") ✓");
+}
 function msgHauteurs(h) {
   return h.manque ? "courbe peu fiable, mesurez encore " + h.manque + " hauteur" + (h.manque > 1 ? "s" : "") + " de cette essence" : "au moins " + HAUTEURS_CIBLE + " hauteurs : courbe calée";
 }
@@ -2073,7 +2077,7 @@ function hauteursCard() {
   const liste = el("div", { class: "filelist h-liste" });
   rows.forEach(h => liste.appendChild(el("div", { class: "filerow", style: "flex-wrap:wrap; row-gap:6px" }, [
     el("span", { class: "nm", style: "flex:1 1 140px; white-space:normal" }, [el("span", { class: "swatch", style: "background:" + speciesColor(h.nom) }), el("b", { text: h.nom })]),
-    el("span", { class: "mono", text: h.n + " / " + HAUTEURS_CIBLE + " hauteur" + (h.n > 1 ? "s" : "") + " mesurée" + (h.n > 1 ? "s" : "") }),
+    el("span", { class: "mono", text: txtHauteurs(h.n) }),
     el("span", { class: "chip " + (h.manque ? "warn" : "ok"), style: "white-space:normal; flex:1 1 100%; border-radius:8px", text: msgHauteurs(h) })
   ])));
   card.appendChild(liste);
@@ -5060,7 +5064,7 @@ function renderFxPlot(body, ss, plot) {
     el("span", { html: zone
       ? "<b>Hauteurs :</b> mesurez la hauteur d'arbres de grosseurs différentes, répartis dans la zone, pour viser au moins 12 à 15 hauteurs par essence. Mesurées dans cette zone : <b>" + hMes.length + "</b>."
       : "<b>" + PROTOCOLE_H + ".</b> Hauteurs mesurées sur cette placette : <b>" + hMes.length + "</b>" + (hMes.length ? " (D " + hMes.map(t => fmt(num(t.diameter), 0)).join(", ") + " cm)" : "") + (hMes.length >= 2 ? "." : ", visez 2 à 3.") }),
-    spIci.length ? el("span", { class: "fx-sens" }, spIci.map(nm => { const n = (cvH[nm] || {}).n || 0; return el("span", { class: "chip " + (n >= HAUTEURS_CIBLE ? "ok" : ""), text: nm + " : " + n + " / " + HAUTEURS_CIBLE + " sur la campagne" }); })) : null
+    spIci.length ? el("span", { class: "fx-sens" }, spIci.map(nm => { const n = (cvH[nm] || {}).n || 0; return el("span", { class: "chip " + (n >= HAUTEURS_CIBLE ? "ok" : ""), text: nm + " : " + txtHauteurs(n) + " sur la campagne" }); })) : null
   ]));
 
   /* formulaire arbre */
@@ -5303,7 +5307,7 @@ function renderFxHeights(body) {
   Array.from(new Set(items.map(o => frNameFor(o.t)))).sort((a, b) => a.localeCompare(b, "fr")).forEach(fr => {
     const n = (curves[fr] && curves[fr].n) || 0;
     const cls = n >= HAUTEURS_CIBLE ? "ok" : "warn";
-    spRows.appendChild(el("span", { class: "chip " + cls }, [el("span", { class: "dot" }), document.createTextNode(fr + " : " + n + " / " + HAUTEURS_CIBLE + " hauteur" + (n > 1 ? "s" : "") + " mesurée" + (n > 1 ? "s" : "") + (n < HAUTEURS_CIBLE ? " (encore " + (HAUTEURS_CIBLE - n) + ")" : ""))]));
+    spRows.appendChild(el("span", { class: "chip " + cls }, [el("span", { class: "dot" }), document.createTextNode(fr + " : " + txtHauteurs(n))]));
   });
   intro.appendChild(spRows);
   intro.appendChild(el("p", { class: "hint", style: "margin:8px 0 0", text: "Compteurs sur l'ensemble des placettes : la courbe d'une essence se construit avec les mesures de toutes les sorties." }));
