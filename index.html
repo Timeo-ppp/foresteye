@@ -6591,6 +6591,12 @@ function renderFxPlan(body) {
       el("button", { class: "btn sm", type: "button", text: "GeoJSON (QGIS)", onclick: () => saveFile(baseName() + "_plan.geojson", plGeoJSON(), "application/geo+json") }),
       el("button", { class: "btn sm", type: "button", text: "Carte hors ligne", onclick: plPrefetch })
     ]));
+    if (plan.points.length) k2.push(el("ul", { class: "hint", style: "margin:0; padding-left:18px" }, [
+      plan.locked ? el("li", { html: "<b>Débloquer pour modifier</b> : refaire le plan (nombre, rayon, emplacement des placettes). À éviter une fois des placettes mesurées : le suivi d'une campagne à l'autre serait rompu. Ajouter ou retirer des placettes ne demande pas de débloquer." }) : null,
+      el("li", { html: "<b>GPX (Guru Maps)</b> : les placettes en points GPS, pour s'y rendre avec une appli de navigation." }),
+      el("li", { html: "<b>GeoJSON (QGIS)</b> : le contour et les placettes, pour un logiciel de cartographie (carte du rapport)." }),
+      el("li", { html: "<b>Carte hors ligne</b> : enregistre le fond de carte de la forêt sur l'appareil, pour l'avoir sans réseau sur le terrain." })
+    ]));
   }
   body.appendChild(plStep(2, "Répartir les placettes", k2));
 
