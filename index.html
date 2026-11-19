@@ -1262,7 +1262,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
   </div>
 
   <div class="card">
-    <h3 class="blk">Diamètre minimal mesuré <button class="helpdot" type="button" data-aide="Les arbres plus fins que ce seuil ne sont pas comptés : ni dans le nombre de tiges, ni dans la surface terrière, ni dans le volume. Une tige importée sous le seuil est gardée dans le projet mais exclue des calculs.">?</button></h3>
+    <h3 class="blk">Diamètre minimal mesuré <button class="helpdot" type="button" data-aide="Les arbres plus fins que ce seuil ne sont pas comptés : ni dans le nombre de troncs, ni dans la surface terrière, ni dans le volume. Un tronc importé sous le seuil est gardé dans le projet mais exclu des calculs.">?</button></h3>
     <div class="row" style="margin-top:12px">
       <label class="f">Diamètre à 1,30 m (cm)
         <input type="text" id="seuilD" value="7,5" readonly aria-readonly="true" style="width:110px; background:var(--surface-2)">
@@ -1329,7 +1329,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
       <label class="f">Inventaire en plein : durée par arbre (min)
         <input type="number" id="tpsMinA" min="0.5" step="0.5" style="width:100px">
       </label>
-      <label class="f">Inventaire en plein : densité attendue (tiges/ha)
+      <label class="f">Inventaire en plein : densité attendue (troncs/ha)
         <span class="sub">facultatif, remplacée par la densité mesurée en placettes s'il y en a</span>
         <input type="number" id="tpsDens" min="1" step="10" style="width:120px">
       </label>
@@ -1395,7 +1395,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div id="heightWarn"></div>
   <div class="tbl-wrap" style="max-height:66vh; overflow-y:auto">
     <table id="tblTrees"><thead><tr>
-      <th>Placette</th><th>Essence</th><th class="num">Tige <button class="helpdot" type="button" data-aide="Cépée : plusieurs tiges sur une même souche. Chaque tige d'au moins 7,5 cm compte comme une tige ; les tiges d'une même souche forment un seul arbre. « 2/3 » : deuxième tige d'une souche qui en compte trois.">?</button></th><th class="num">D (cm)</th><th class="num">H (m)</th>
+      <th>Placette</th><th>Essence</th><th class="num">Tronc <button class="helpdot" type="button" data-aide="Cépée : plusieurs troncs sur une même souche. Chaque tronc d'au moins 7,5 cm compte ; les troncs d'une même souche forment un seul arbre. « 2/3 » : deuxième tronc d'une souche qui en compte trois.">?</button></th><th class="num">D (cm)</th><th class="num">H (m)</th>
       <th class="num">g (m²)</th><th class="num">f</th><th class="num">V bois fort tige (m³) <button class="helpdot" type="button" data-aide="Volume bois fort tige (jusqu'à 7 cm de diamètre) : le tronc, du sol jusqu'à une découpe de 7 cm de diamètre (définition de l'inventaire forestier national IGN), sans les branches. V = g × H × f.">?</button></th>
       <th>Origine de la hauteur</th><th class="num">GPS ± (m)</th>
     </tr></thead><tbody></tbody></table>
@@ -1414,11 +1414,11 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <h3 class="blk">Par placette</h3>
     <div class="tbl-wrap" style="margin-top:10px">
       <table id="tblPlots"><thead><tr>
-        <th>Placette</th><th>Sortie</th><th class="num">Surface utile (m²)</th><th class="num">Dans la forêt</th><th class="num">Arbres (souches)</th><th class="num">Tiges</th>
+        <th>Placette</th><th>Sortie</th><th class="num">Surface utile (m²)</th><th class="num">Dans la forêt</th><th class="num">Arbres (souches)</th><th class="num">Troncs</th>
         <th class="num">Σg (m²)</th><th class="num">ΣV bois fort tige (m³)</th><th class="num">G (m²/ha)</th><th class="num">V bois fort tige (m³/ha)</th>
       </tr></thead><tbody></tbody><tfoot></tfoot></table>
     </div>
-    <p class="hint" id="plotsVolNote" style="margin:8px 0 0">V : volume bois fort tige (jusqu'à 7 cm de diamètre). Tiges de 7,5 cm de diamètre et plus ; les tiges d'une même souche (cépée) forment un seul arbre.</p>
+    <p class="hint" id="plotsVolNote" style="margin:8px 0 0">V : volume bois fort tige (jusqu'à 7 cm de diamètre). Troncs de 7,5 cm de diamètre et plus ; les troncs d'une même souche (cépée) forment un seul arbre.</p>
   </div>
 
   <div id="dureesBox"></div>
@@ -1438,7 +1438,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <h3 class="blk">Par essence</h3>
     <div class="tbl-wrap" style="margin-top:10px">
       <table id="tblSpecies"><thead><tr>
-        <th>Essence</th><th class="num">Arbres (souches)</th><th class="num">Tiges</th><th class="num">D moyen (cm)</th><th class="num">H moyenne (m)</th>
+        <th>Essence</th><th class="num">Arbres (souches)</th><th class="num">Troncs</th><th class="num">D moyen (cm)</th><th class="num">H moyenne (m)</th>
         <th class="num">Σg (m²)</th><th class="num">ΣV bois fort tige (m³)</th><th class="num">% du volume</th>
       </tr></thead><tbody></tbody><tfoot></tfoot></table>
     </div>
@@ -1601,12 +1601,12 @@ input.fx-big{font-size:18px; padding:10px 12px}
       <dl class="gloss" style="margin-top:14px">
         <div><dt>Placette</dt><dd>Petit cercle de forêt (ici environ 200 m², rayon 7,98 m) où l'on mesure tous les arbres. On en mesure plusieurs, réparties dans la parcelle, plutôt que de mesurer la forêt entière. Une placette trop longue à mesurer peut être prise avec un rayon réduit, choisi en l'ouvrant : le calcul utilise alors sa surface réelle.</dd></div>
         <div><dt>Diamètre minimal : 7,5 cm</dt><dd>Seuil de l'inventaire forestier national IGN : arbres dont la circonférence à 1,30 m atteint 23,5 cm (diamètre 7,5 cm). Fixe, pour que deux inventaires soient comparables : un arbre plus fin n'est pas compté. Si une placette est trop longue à mesurer, on réduit son rayon, jamais le seuil.</dd></div>
-        <div><dt>Cépée (arbre à plusieurs tiges)</dt><dd>Plusieurs tiges sur une même souche. Chaque tige d'au moins 7,5 cm compte comme une tige, dans le nombre de tiges, la surface terrière et le volume ; les tiges d'une même souche restent un seul arbre. Les tableaux donnent les deux : « arbres (souches) » et « tiges ». À la saisie, bouton « Ajouter une tige » sur l'arbre.</dd></div>
+        <div><dt>Cépée (arbre à plusieurs troncs)</dt><dd>Plusieurs troncs sur une même souche. Chaque tronc d'au moins 7,5 cm compte, dans le nombre de troncs, la surface terrière et le volume ; les troncs d'une même souche restent un seul arbre. Les tableaux donnent les deux : « arbres (souches) » et « troncs ». À la saisie, bouton « Ajouter un tronc » sur l'arbre.</dd></div>
         <div><dt>DHP, diamètre à hauteur de poitrine</dt><dd>Diamètre du tronc mesuré à 1,30 m du sol, en centimètres. C'est la convention forestière universelle.</dd></div>
         <div><dt>Surface terrière (g, G)</dt><dd>Surface de la section du tronc à 1,30 m : <span class="formula">g = π × D² / 40000</span>. Additionnée sur une placette puis ramenée à l'hectare, elle donne G en m²/ha, l'indicateur de densité du peuplement.</dd></div>
         <div><dt>Coefficient de forme (f)</dt><dd>Un tronc est plus fin en haut qu'en bas. f corrige le volume du cylindre théorique : f = V / (g × H). Les valeurs de l'application viennent d'équations publiées de volume bois fort tige, essence par essence (sources dans l'onglet Essences) ; le Chêne vert et les « Autres » ont une valeur provisoire, leur volume est indicatif. <span id="noteCoefsAide"></span></dd></div>
         <div><dt>Courbe de hauteur</dt><dd>Relation entre diamètre et hauteur, ajustée pour chaque essence sur les arbres dont la hauteur a été mesurée : <span class="formula">H = a + b × ln(D)</span>. Elle sert à estimer la hauteur des arbres non mesurés. Protocole : la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne ; en dessous de 12, l'application signale une courbe peu fiable. Avec moins de 3 arbres mesurés, elle prend la hauteur moyenne de l'essence. Chaque arbre indique l'origine de sa hauteur : « mesurée », « estimée (courbe) » ou « estimée (moyenne) ».</dd></div>
-        <div><dt>Volume bois fort tige (V)</dt><dd><span class="formula">V = g × H × f</span>, en m³ par tige : le tronc, du sol jusqu'à une découpe de 7 cm de diamètre (définition de l'inventaire forestier national IGN), sans les branches. C'est le volume affiché partout dans l'application.</dd></div>
+        <div><dt>Volume bois fort tige (V)</dt><dd><span class="formula">V = g × H × f</span>, en m³ par tronc : le tronc, du sol jusqu'à une découpe de 7 cm de diamètre (définition de l'inventaire forestier national IGN), sans les branches. C'est le volume affiché partout dans l'application.</dd></div>
       </dl>
     </div>
     <div class="card">
@@ -2863,13 +2863,13 @@ async function handleFiles(fileList) {
     // cépées : stems.csv donne les tiges de chaque arbre
     const multi = tigesArboreal(ss);
     const nCep = multi ? Object.keys(multi).filter(k => multi[k].length > 1).length : 0;
-    if (nCep) report.push({ f: "stems.csv", kind: "cepees", msg: nCep + " arbre" + (nCep > 1 ? "s" : "") + " à plusieurs tiges (cépées) : chaque tige de 7,5 cm et plus compte" });
+    if (nCep) report.push({ f: "stems.csv", kind: "cepees", msg: nCep + " arbre" + (nCep > 1 ? "s" : "") + " à plusieurs troncs (cépées) : chaque tronc de 7,5 cm et plus compte" });
     // correspondances d'essences automatiques, à vérifier dans l'onglet Essences
     const aConf = Array.from(new Set(ss.trees.filter(t => speciesMatch(t).how === "a_confirmer").map(t => clean(t.latin_name) + " → " + frNameFor(t))));
     if (aConf.length) report.push({ f: "Essences", kind: "essences", msg: "à confirmer dans l'onglet Essences : " + aConf.join(", ") });
     // seuil de 7,5 cm : les tiges plus petites sont importées et gardées, mais exclues des calculs
     const sous = excludedStems().filter(t => t.sessionId === ss.id).length;
-    if (sous) report.push({ f: "Seuil de 7,5 cm", kind: "seuil", msg: (sous > 1 ? sous + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") + " (importée" + (sous > 1 ? "s" : "") + " et gardée" + (sous > 1 ? "s" : "") + " dans le projet, mais exclue" + (sous > 1 ? "s" : "") + " des calculs)" });
+    if (sous) report.push({ f: "Seuil de 7,5 cm", kind: "seuil", msg: (sous > 1 ? sous + " troncs sous 7,5 cm non comptés" : "1 tronc sous 7,5 cm non compté") + " (importée" + (sous > 1 ? "s" : "") + " et gardée" + (sous > 1 ? "s" : "") + " dans le projet, mais exclue" + (sous > 1 ? "s" : "") + " des calculs)" });
   }
   renderAll(anyData, report);
   if (nouvelle) {
@@ -3001,7 +3001,7 @@ function renderImport(report) {
     head.appendChild(el("span", { class: "chip" + (ss.demo ? " warn" : ""), text: ss.demo ? "exemple fictif" : ss.field ? "saisie ForestEye" : "import Arboreal" }));
     head.appendChild(el("span", { class: "chip", text: plots.length + " placette" + (plots.length > 1 ? "s" : "") }));
     head.appendChild(el("span", { class: "chip", text: nTrees + " arbre" + (nTrees > 1 ? "s" : "") }));
-    if (nSousSeuil) head.appendChild(el("span", { class: "chip warn", title: "Importées et gardées dans le projet, mais exclues des calculs (seuil de l'inventaire forestier national IGN)", text: (nSousSeuil > 1 ? nSousSeuil + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") }));
+    if (nSousSeuil) head.appendChild(el("span", { class: "chip warn", title: "Importées et gardées dans le projet, mais exclues des calculs (seuil de l'inventaire forestier national IGN)", text: (nSousSeuil > 1 ? nSousSeuil + " troncs sous 7,5 cm non comptés" : "1 tronc sous 7,5 cm non compté") }));
     head.appendChild(el("label", { class: "pl-chk", title: "Décochez une sortie d'une ancienne campagne pour ne pas compter deux fois les mêmes placettes" }, [
       el("input", { type: "checkbox", checked: !ss.off, onchange: e => { ss.off = !e.target.checked; renderAll(); toast(ss.off ? "« " + ss.label + " » n'entre plus dans les calculs" : "« " + ss.label + " » entre dans les calculs"); } }),
       document.createTextNode(" Compter dans les calculs")
@@ -3248,16 +3248,16 @@ function renderTrees() {
 
   const shown = trees.filter(t => (!state.ui.fPlot || t.plotId === state.ui.fPlot) && (!state.ui.fSpecies || t.fr === state.ui.fSpecies));
   const nsS = nSouches(shown);
-  $("#treesCount").textContent = shown.length + " tige" + (shown.length > 1 ? "s" : "") + (shown.length !== trees.length ? " sur " + trees.length : "") + " · " + nsS + " arbre" + (nsS > 1 ? "s" : "") + " (souches)";
+  $("#treesCount").textContent = shown.length + " tronc" + (shown.length > 1 ? "s" : "") + (shown.length !== trees.length ? " sur " + trees.length : "") + " · " + nsS + " arbre" + (nsS > 1 ? "s" : "") + " (souches)";
   const parSouche = {};
   trees.forEach(t => { const k = t.sessionId + "|" + t.soucheId; parSouche[k] = (parSouche[k] || 0) + 1; });
 
   const hw = $("#heightWarn"); hw.innerHTML = "";
   const exclues = excludedStems().filter(t => !state.ui.fPlot || t.plotId === state.ui.fPlot);
   if (exclues.length) hw.appendChild(el("details", { class: "acc", style: "margin-bottom:10px" }, [
-    el("summary", { text: (exclues.length > 1 ? exclues.length + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") + " (gardées dans le projet, hors calculs)" }),
+    el("summary", { text: (exclues.length > 1 ? exclues.length + " troncs sous 7,5 cm non comptés" : "1 tronc sous 7,5 cm non compté") + " (gardées dans le projet, hors calculs)" }),
     el("div", null, [
-      el("p", { class: "hint", style: "margin:0 0 8px", text: "Seuil de l'inventaire forestier national IGN : circonférence de 23,5 cm à 1,30 m (diamètre 7,5 cm). Ces tiges n'entrent ni dans le nombre de tiges, ni dans la surface terrière, ni dans le volume." }),
+      el("p", { class: "hint", style: "margin:0 0 8px", text: "Seuil de l'inventaire forestier national IGN : circonférence de 23,5 cm à 1,30 m (diamètre 7,5 cm). Ces troncs n'entrent ni dans le nombre de troncs, ni dans la surface terrière, ni dans le volume." }),
       el("div", { class: "filelist" }, exclues.slice(0, 300).map(t => el("div", { class: "filerow" }, [
         el("span", { class: "nm", text: "Placette " + (t.plot ? t.plot.label : t.plotId) + " · " + t.fr }),
         el("span", { class: "mono", text: "D " + fmt(t.D, 1) + " cm" })
@@ -3291,7 +3291,7 @@ function renderTrees() {
     ]));
   });
   tb.appendChild(frag);
-  if (shown.length > 3000) tb.appendChild(el("tr", null, el("td", { colspan: "10", class: "hint", text: "Affichage limité aux 3000 premières tiges. L'export contient tout." })));
+  if (shown.length > 3000) tb.appendChild(el("tr", null, el("td", { colspan: "10", class: "hint", text: "Affichage limité aux 3000 premiers troncs. L'export contient tout." })));
 }
 
 /* ==================================================================
@@ -3330,7 +3330,7 @@ function renderSynthese() {
       el("td", { class: "num", text: fmt(tot.ar > 0 ? tot.g * 10000 / tot.ar : NaN, 2) }),
       el("td", { class: "num", text: fmt(tot.ar > 0 ? tot.v * 10000 / tot.ar : NaN, 1) })
     ]));
-    $("#plotsVolNote").textContent = "V : volume bois fort tige (jusqu'à 7 cm de diamètre). Tiges de 7,5 cm de diamètre et plus ; les tiges d'une même souche (cépée) forment un seul arbre." +
+    $("#plotsVolNote").textContent = "V : volume bois fort tige (jusqu'à 7 cm de diamètre). Troncs de 7,5 cm de diamètre et plus ; les troncs d'une même souche (cépée) forment un seul arbre." +
       (tot.vi > 0 ? " Volume indicatif pour ces essences : " + Array.from(new Set(allTrees().filter(t => t.indicatif).map(t => t.fr))).join(", ") + " (" + fmt(tot.vi / tot.v * 100, 0) + " % du volume mesuré)." : "");
   }
 
@@ -3522,7 +3522,7 @@ function renderStats() {
   head.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: a.nPlots + " placette" + (a.nPlots > 1 ? "s" : "") + " · " + confLabel() + " · loi de Student bilatérale (équivalent T.INV.2T d'Excel) · valeurs de chaque placette ramenées à l'hectare" +
     (isFinite(a.Npop) ? " · correction de population finie : la forêt contient " + fmt(a.Npop, 1) + " placettes, erreur type × √(1 - n/N) = " + fmt(a.ind.v.fpc, 3) : " · sans correction de population finie (méthode du fichier Excel)") }));
   head.appendChild(statTable([
-    { label: "Nombre de tiges (/ha)", stat: a.ind.n, dec: 1 },
+    { label: "Nombre de troncs (/ha)", stat: a.ind.n, dec: 1 },
     { label: "Surface terrière G (m²/ha)", stat: a.ind.g, dec: 2 },
     { label: VOL_LBL + ", m³/ha", stat: a.ind.v, dec: 1 }
   ]));
@@ -3588,7 +3588,7 @@ function renderResult() {
   $("#resultSubtitle").textContent += (/\.$/.test($("#resultSubtitle").textContent) ? " " : " · ") + SEUIL_TXT.charAt(0).toUpperCase() + SEUIL_TXT.slice(1) + ".";
   const sousSeuil = excludedStems().length;
   // 19/11/2026 : note retirée de Résultat à la demande de Timéo (les tiges sous le seuil restent listées dans Arbres)
-  if (false && sousSeuil) g.appendChild(el("div", { class: "note", html: "<b>" + (sousSeuil > 1 ? sousSeuil + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") + ".</b> Seuil de l'inventaire forestier national IGN (circonférence 23,5 cm à 1,30 m) : ces tiges restent dans le projet, mais n'entrent dans aucun total." }));
+  if (false && sousSeuil) g.appendChild(el("div", { class: "note", html: "<b>" + (sousSeuil > 1 ? sousSeuil + " troncs sous 7,5 cm non comptés" : "1 tronc sous 7,5 cm non compté") + ".</b> Seuil de l'inventaire forestier national IGN (circonférence 23,5 cm à 1,30 m) : ces troncs restent dans le projet, mais n'entrent dans aucun total." }));
 
   if (plein ? !a.nTrees : !a.nPlots) {
     g.appendChild(el("div", { class: "empty" }, [
@@ -3608,7 +3608,7 @@ function renderResult() {
 
   const F = a.F;   // surface de la parcelle (ou de la zone comptée en plein) en hectares
   const items = [
-    { k: "n", lbl: "Nombre de tiges", tl: "Nombre de tiges", stat: a.ind.n, unit: "", dec: 0, hdec: 1, hu: "tiges/ha" },
+    { k: "n", lbl: "Nombre de troncs", tl: "Nombre de troncs", stat: a.ind.n, unit: "", dec: 0, hdec: 1, hu: "troncs/ha" },
     { k: "g", lbl: "Surface terrière", tl: "Surface terrière (m²)", stat: a.ind.g, unit: "m²", dec: 1, hdec: 2, hu: "m²/ha" },
     { k: "v", lbl: "Volume de bois (tronc)", tl: "Volume de bois (m³)", stat: a.ind.v, unit: "m³", dec: 1, hdec: 1, hu: "m³/ha" }
   ];
@@ -3620,7 +3620,7 @@ function renderResult() {
     const e = it.stat.ePct;
     const cls = plein ? "k-ok" : !isFinite(e) ? "" : (e <= state.config.threshold ? "k-ok" : (e <= state.config.threshold * 2 ? "k-warn" : "k-crit"));
     const card = el("div", { class: "kpi " + cls });
-    card.appendChild(el("span", { class: "lbl" }, [document.createTextNode(it.lbl), it.k === "v" ? aide(VOL_AIDE_SIMPLE) : it.k === "n" ? aide("Chaque tronc de 7,5 cm de diamètre ou plus compte comme une tige. Un arbre à plusieurs troncs sur la même souche (cépée) compte pour un arbre, mais pour autant de tiges que de troncs.")
+    card.appendChild(el("span", { class: "lbl" }, [document.createTextNode(it.lbl), it.k === "v" ? aide(VOL_AIDE_SIMPLE) : it.k === "n" ? aide("Chaque tronc de 7,5 cm de diamètre ou plus est compté. Un arbre à plusieurs troncs sur la même souche (cépée) compte pour un arbre, mais pour autant de troncs.")
       : aide("Imaginez qu'on coupe tous les arbres à 1,30 m du sol : la surface terrière est la somme des surfaces de toutes ces coupes. Plus elle est grande, plus la forêt est riche en bois.")]));
     card.appendChild(el("div", { class: "kpi-val", html: fmt(val, plein && it.dec === 1 ? 2 : it.dec) + (it.unit ? ' <span class="unit">' + it.unit + "</span>" : "") }));
     if (plein) card.appendChild(el("span", { class: "sub", text: MSG_PLEIN }));
@@ -3635,7 +3635,7 @@ function renderResult() {
   const dens = el("div", { class: "kpi" });
   dens.appendChild(el("span", { class: "lbl", text: "Pour 1 hectare" }));
   dens.appendChild(el("div", { class: "kpi-val", html: fmt(a.ind.g.mean, 1) + ' <span class="unit">m²/ha</span>' }));
-  dens.appendChild(el("span", { class: "sub", text: "de surface terrière · " + fmt(a.ind.v.mean, 0) + " m³ de bois · " + fmt(a.ind.n.mean, 0) + " tiges" }));
+  dens.appendChild(el("span", { class: "sub", text: "de surface terrière · " + fmt(a.ind.v.mean, 0) + " m³ de bois · " + fmt(a.ind.n.mean, 0) + " troncs" }));
   k.appendChild(dens);
   const hc = hauteursCard(); if (hc) $("#resultHauteurs").appendChild(hc);
 
@@ -3679,7 +3679,7 @@ function renderResult() {
     c2.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: "Le même calcul, essence par essence. La marge d'une essence seule est plus large que celle du total : c'est normal, elle repose sur moins d'arbres." }));
     const tw2 = el("div", { class: "tbl-wrap" });
     const t2 = el("table");
-    t2.innerHTML = "<thead><tr><th>Essence</th><th class='num'>Tiges</th><th class='num'>Surface terrière (m²)</th><th class='num'>Volume de bois (m³)</th><th class='num'>Part du volume</th><th class='num'>Marge</th></tr></thead>";
+    t2.innerHTML = "<thead><tr><th>Essence</th><th class='num'>Troncs</th><th class='num'>Surface terrière (m²)</th><th class='num'>Volume de bois (m³)</th><th class='num'>Part du volume</th><th class='num'>Marge</th></tr></thead>";
     const b2 = el("tbody");
     sp.forEach(s => {
       const st = a.perSpecies.find(x => x.name === s.name);
@@ -3737,7 +3737,7 @@ function renderResultPleinDetail(a, items, d, rs) {
   const card = el("div", { class: "card" });
   card.appendChild(el("h3", { class: "blk", text: "Totaux de la zone comptée" }));
   const ns = nSouches(allTrees());
-  card.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: "Chaque total est la somme des arbres comptés (" + a.nTrees + " tige" + (a.nTrees > 1 ? "s" : "") + (ns !== a.nTrees ? " sur " + ns + " arbres (souches)" : "") + "). " + MSG_PLEIN + " : aucune marge n'est calculée." + (a.area > 0 ? " Valeurs à l'hectare = total / " + fmt(a.area / 10000, 4) + " ha." : "") }));
+  card.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: "Chaque total est la somme des arbres comptés (" + a.nTrees + " tronc" + (a.nTrees > 1 ? "s" : "") + (ns !== a.nTrees ? " sur " + ns + " arbres (souches)" : "") + "). " + MSG_PLEIN + " : aucune marge n'est calculée." + (a.area > 0 ? " Valeurs à l'hectare = total / " + fmt(a.area / 10000, 4) + " ha." : "") }));
   const tw = el("div", { class: "tbl-wrap" }), t = el("table");
   t.innerHTML = "<thead><tr><th>Indicateur</th><th class='num'>Total compté</th><th class='num'>À l'hectare</th><th>Précision</th></tr></thead>";
   const b = el("tbody");
@@ -3757,7 +3757,7 @@ function renderResultPleinDetail(a, items, d, rs) {
   c2.appendChild(el("h3", { class: "blk", text: "Volume bois fort tige par essence" }));
   c2.appendChild(el("p", { class: "hint", style: "margin:4px 0 14px", text: "Volume bois fort tige (jusqu'à 7 cm de diamètre). Sommes par essence sur la zone comptée, sans extrapolation." }));
   const tw2 = el("div", { class: "tbl-wrap" }), t2 = el("table");
-  t2.innerHTML = "<thead><tr><th>Essence</th><th class='num'>Arbres (souches)</th><th class='num'>Tiges</th><th class='num'>Surface terrière (m²)</th><th class='num'>Volume bois fort tige (m³)</th><th class='num'>% du volume</th></tr></thead>";
+  t2.innerHTML = "<thead><tr><th>Essence</th><th class='num'>Arbres (souches)</th><th class='num'>Troncs</th><th class='num'>Surface terrière (m²)</th><th class='num'>Volume bois fort tige (m³)</th><th class='num'>% du volume</th></tr></thead>";
   const b2 = el("tbody");
   sp.forEach(s => b2.appendChild(el("tr", null, [
     el("td", null, [el("span", { class: "swatch", style: "background:" + speciesColor(s.name) }), document.createTextNode(s.name), chipIndicatif(s.name)]),
@@ -3884,7 +3884,7 @@ function renderMap() {
   plots.forEach(p => {
     if (!isFinite(p.lat) || !isFinite(p.lon)) return;
     L.circle([p.lat, p.lon], { radius: p.radius, color: cssVal("var(--accent)"), weight: 2, fillOpacity: 0.07 })
-      .bindPopup("<b>Placette " + fxEsc(p.label) + "</b><br>" + p.n + " tiges, " + p.souches + " arbres (souches) · " + fmt(p.area, 1) + " m²<br>G = " + fmt(p.gHa, 1) + " m²/ha · V bois fort tige = " + fmt(p.vHa, 1) + " m³/ha").addTo(LAYERS.g);
+      .bindPopup("<b>Placette " + fxEsc(p.label) + "</b><br>" + p.n + " troncs, " + p.souches + " arbres (souches) · " + fmt(p.area, 1) + " m²<br>G = " + fmt(p.gHa, 1) + " m²/ha · V bois fort tige = " + fmt(p.vHa, 1) + " m³/ha").addTo(LAYERS.g);
     L.circleMarker([p.lat, p.lon], { radius: 3, color: cssVal("var(--accent)"), fillColor: cssVal("var(--accent)"), fillOpacity: 1, weight: 0 }).addTo(LAYERS.g);
     bounds.push([p.lat, p.lon]);
   });
@@ -3968,7 +3968,7 @@ function renderPlan() {
     ts.forEach(t => { if (t.carre) cnt[t.carre] = (cnt[t.carre] || 0) + 1; });
     const sans = ts.filter(t => !t.carre).length;
     if (Object.keys(cnt).length) { const f = el("div"); f.innerHTML = refZoneSVG(cnt, { max: 360 }); box.appendChild(f); }
-    box.appendChild(el("p", { class: "hint", style: "margin-top:8px", text: "Inventaire en plein : " + ts.length + " tige" + (ts.length > 1 ? "s" : "") + " comptée" + (ts.length > 1 ? "s" : "") + (Object.keys(cnt).length ? ", réparties par carré de 10 × 10 m (nombre de tiges par carré)" : "") + (sans ? ", dont " + sans + " sans carré noté" : "") + ". Les arbres ne sont pas positionnés un par un." }));
+    box.appendChild(el("p", { class: "hint", style: "margin-top:8px", text: "Inventaire en plein : " + ts.length + " tronc" + (ts.length > 1 ? "s" : "") + " compté" + (ts.length > 1 ? "s" : "") + (Object.keys(cnt).length ? ", réparties par carré de 10 × 10 m (nombre de troncs par carré)" : "") + (sans ? ", dont " + sans + " sans carré noté" : "") + ". Les arbres ne sont pas positionnés un par un." }));
     return;
   }
   const trees = allTrees().filter(t => t.plotId === p.id && isFinite(t.x) && isFinite(t.z));
@@ -4020,11 +4020,11 @@ function treeRows() {
     rnd(t.lat, 7), rnd(t.lon, 7), rnd(t.acc, 2)
   ]);
 }
-const TREE_HEAD = ["Sortie", "N° placette", "sample_id", "Arbre (souche)", "Tige", "tree_id", "Essence", "Nom latin", "specie_id", "Carré",
+const TREE_HEAD = ["Sortie", "N° placette", "sample_id", "Arbre (souche)", "Tronc", "tree_id", "Essence", "Nom latin", "specie_id", "Carré",
   "Diamètre 1m30 (cm)", "Hauteur (m)", "Origine de la hauteur", "g (m²)", "f", "V bois fort tige jusqu'à 7 cm (m³)", "Volume indicatif", "Latitude", "Longitude", "Précision GPS (m)"];
 const PLOT_HEAD = ["N° placette", "Sortie", "sample_id", "Placette du plan", "Surface utile (m²)", "Part dans la forêt (%)", "Rayon (m)", "Rayon réduit",
-  "Arbres (souches)", "Tiges", "Σg (m²)", "ΣV bois fort tige (m³)", "Tiges/ha", "G (m²/ha)", "V bois fort tige (m³/ha)", "Latitude", "Longitude"];
-const SPEC_HEAD = ["Essence", "Coefficient f", "Source du coefficient", "Volume indicatif", "Arbres (souches)", "Tiges", "D moyen (cm)", "H moyenne (m)",
+  "Arbres (souches)", "Troncs", "Σg (m²)", "ΣV bois fort tige (m³)", "Troncs/ha", "G (m²/ha)", "V bois fort tige (m³/ha)", "Latitude", "Longitude"];
+const SPEC_HEAD = ["Essence", "Coefficient f", "Source du coefficient", "Volume indicatif", "Arbres (souches)", "Troncs", "D moyen (cm)", "H moyenne (m)",
   "Hauteurs mesurées", "Σg (m²)", "ΣV bois fort tige (m³)", "% du volume"];
 const rnd = (v, d) => (isFinite(v) ? Math.round(v * 10 ** d) / 10 ** d : "");
 function plotRows() {
@@ -4057,13 +4057,13 @@ function resultRows() {
   const a = analysis();
   const rows = [["Paramètre", "Valeur"]];
   rows.push(["Arbres inventoriés", SEUIL_TXT + " (circonférence 23,5 cm et plus à 1,30 m, seuil de l'inventaire forestier national IGN)"]);
-  rows.push(["Tiges sous 7,5 cm non comptées", excludedStems().length]);
+  rows.push(["Troncs sous 7,5 cm non comptés", excludedStems().length]);
   rows.push(["Volume", VOL_LBL + " : V = g × H × f, coefficients de forme publiés (onglet Coeff_Forme)"]);
   const pi = partIndicative(a);
   if (pi.noms.length) rows.push(["Volume indicatif", mentionIndicative(pi)]);
   const tc = allTrees();
-  if (nSouches(tc) !== tc.length) rows.push(["Cépées", tc.length + " tiges mesurées sur " + nSouches(tc) + " arbres (souches)"]);
-  const lignes = [["Nombre de tiges", a.ind.n], ["Surface terrière (m²)", a.ind.g], ["Volume bois fort tige jusqu'à 7 cm (m³)", a.ind.v]];
+  if (nSouches(tc) !== tc.length) rows.push(["Cépées", tc.length + " troncs mesurés sur " + nSouches(tc) + " arbres (souches)"]);
+  const lignes = [["Nombre de troncs", a.ind.n], ["Surface terrière (m²)", a.ind.g], ["Volume bois fort tige jusqu'à 7 cm (m³)", a.ind.v]];
   if (a.plein) {
     rows.push(["Méthode", "Inventaire en plein : tous les arbres de la zone sont comptés, totaux = sommes"]);
     rows.push(["Zone comptée", a.refZone ? "Zone de référence de 50 × 50 m" : (state.parcelle.name || "-")]);
@@ -4297,9 +4297,9 @@ function reportHTML() {
   const fictif = isDemo() ? "<p><b>Attention : exemple fictif, aucun chiffre ne décrit une forêt réelle.</b></p>" : "";
   const nSous = excludedStems().length;
   const seuilP = "<p class=m><b>Inventaire des " + SEUIL_TXT + "</b> (circonférence de 23,5 cm et plus à 1,30 m, seuil de l'inventaire forestier national IGN)" +
-    (nSous ? " : " + (nSous > 1 ? nSous + " tiges sous 7,5 cm non comptées" : "1 tige sous 7,5 cm non comptée") : "") + ".</p>";
+    (nSous ? " : " + (nSous > 1 ? nSous + " troncs sous 7,5 cm non comptés" : "1 tronc sous 7,5 cm non compté") : "") + ".</p>";
   const sps = speciesSummaries(), pi = partIndicative(a);
-  const parEssence = "<h2>Répartition par essence</h2><table><tr><th>Essence</th><th>Arbres (souches)</th><th>Tiges</th><th>Σg (m²)</th><th>ΣV bois fort tige (m³)</th><th>% volume</th></tr>" +
+  const parEssence = "<h2>Répartition par essence</h2><table><tr><th>Essence</th><th>Arbres (souches)</th><th>Troncs</th><th>Σg (m²)</th><th>ΣV bois fort tige (m³)</th><th>% volume</th></tr>" +
     sps.map(s => "<tr><td>" + esc(s.name) + (s.indicatif ? " (volume indicatif)" : "") + "</td><td>" + s.souches + "</td><td>" + s.n + "</td><td>" + fmt(s.sumG, 4) + "</td><td>" + fmt(s.sumV, 3) + "</td><td>" + fmt(s.pctV, 1) + " %</td></tr>").join("") + "</table>" +
     (pi.noms.length ? "<p class=m>Volume " + esc(mentionIndicative(pi)) + " : coefficient de forme sans équation publiée.</p>" : "") +
     "<h2>Coefficients de forme</h2><table><tr><th>Essence</th><th>f</th><th style='text-align:left'>Source</th></tr>" +
@@ -4311,11 +4311,11 @@ function reportHTML() {
       "<h2>Paramètres</h2><table><tr><td>Surface de la zone comptée</td><td>" + (a.area > 0 ? fmt(a.area, 0) + " m² (" + fmt(a.F, 4) + " ha)" : "inconnue") + "</td></tr>" +
       "<tr><td>Arbres comptés</td><td>" + a.nTrees + (est ? " (dont " + est + " hauteurs estimées par la courbe de hauteur)" : "") + "</td></tr></table>" +
       "<h2>Résultats</h2><table><tr><th>Indicateur</th><th>Total compté</th><th>À l'hectare</th><th>Précision</th></tr>" +
-      ligne("Nombre de tiges", a.ind.n, 0, "tiges/ha") + ligne("Surface terrière (m²)", a.ind.g, 2, "m²/ha") + ligne("Volume bois fort tige, jusqu'à 7 cm de diamètre (m³)", a.ind.v, 2, "m³/ha") + "</table>" +
+      ligne("Nombre de troncs", a.ind.n, 0, "troncs/ha") + ligne("Surface terrière (m²)", a.ind.g, 2, "m²/ha") + ligne("Volume bois fort tige, jusqu'à 7 cm de diamètre (m³)", a.ind.v, 2, "m³/ha") + "</table>" +
       "<p class=m>" + MSG_PLEIN + " : les totaux sont des sommes, sans tirage ni extrapolation. Restent les erreurs de mesure (diamètres, hauteurs estimées) et l'incertitude des coefficients de forme.</p>" +
       parEssence +
       "<h2>Méthode</h2><p class=m>Surface terrière individuelle g = π × D² / 40000 (D en cm). " + esc(VOL_AIDE) + " " +
-      "Hauteurs non mesurées estimées par une courbe de hauteur par essence, H = a + b × ln(D). Chaque tige de 7,5 cm et plus compte, y compris dans les cépées. Totaux = sommes sur tous les arbres de la zone ; valeurs à l'hectare = totaux / surface de la zone.</p></html>";
+      "Hauteurs non mesurées estimées par une courbe de hauteur par essence, H = a + b × ln(D). Chaque tronc de 7,5 cm et plus compte, y compris dans les cépées. Totaux = sommes sur tous les arbres de la zone ; valeurs à l'hectare = totaux / surface de la zone.</p></html>";
   }
   return tete +
     "<p class=m>Synthèse produite par ForestEye le " + new Date().toLocaleDateString("fr-FR") +
@@ -4326,12 +4326,12 @@ function reportHTML() {
     "<tr><td>Placettes en lisière (surface corrigée)</td><td>" + a.edgePlots + "</td></tr>" +
     "<tr><td>Arbres mesurés</td><td>" + allTrees().length + (est ? " (dont " + est + " hauteurs estimées par la courbe de hauteur)" : "") + "</td></tr></table>" +
     "<h2>Résultats extrapolés</h2><table><tr><th>Indicateur</th><th>Moyenne à l'hectare</th><th>Parcelle entière</th><th>Intervalle (" + fmt(a.conf * 100, 0) + " % de confiance)</th><th>Marge</th></tr>" +
-    row("Nombre de tiges", a.ind.n, 0, "tiges/ha") + row("Surface terrière (m²)", a.ind.g, 1, "m²/ha") + row("Volume bois fort tige, jusqu'à 7 cm de diamètre (m³)", a.ind.v, 1, "m³/ha") + "</table>" +
+    row("Nombre de troncs", a.ind.n, 0, "troncs/ha") + row("Surface terrière (m²)", a.ind.g, 1, "m²/ha") + row("Volume bois fort tige, jusqu'à 7 cm de diamètre (m³)", a.ind.v, 1, "m³/ha") + "</table>" +
     "<p class=m>Objectif : marge de ± " + fmt(state.config.threshold, 0) + " % au plus (" + fmt(a.conf * 100, 0) + " % de confiance). La marge ne compte que l'erreur d'échantillonnage : ni les erreurs de mesure, ni les hauteurs estimées, ni les coefficients de forme.</p>" +
     parEssence +
-    "<h2>Placettes</h2><table><tr><th>Placette</th><th>Surface utile (m²)</th><th>Arbres (souches)</th><th>Tiges</th><th>Σg (m²)</th><th>ΣV bois fort tige (m³)</th><th>V bois fort tige (m³/ha)</th></tr>" +
+    "<h2>Placettes</h2><table><tr><th>Placette</th><th>Surface utile (m²)</th><th>Arbres (souches)</th><th>Troncs</th><th>Σg (m²)</th><th>ΣV bois fort tige (m³)</th><th>V bois fort tige (m³/ha)</th></tr>" +
     plotSummaries().map(p => "<tr><td>" + esc(p.label) + "</td><td>" + fmt(p.area, 1) + (clean(p.raw.radius_reduced) === "1" ? " (rayon réduit)" : "") + "</td><td>" + p.souches + "</td><td>" + p.n + "</td><td>" + fmt(p.sumG, 4) + "</td><td>" + fmt(p.sumV, 3) + "</td><td>" + fmt(p.vHa, 1) + "</td></tr>").join("") + "</table>" +
-    "<h2>Méthode</h2><p class=m>Surface terrière individuelle g = π × D² / 40000 (D en cm). " + esc(VOL_AIDE) + " Chaque tige de 7,5 cm et plus compte, y compris dans les cépées. " +
+    "<h2>Méthode</h2><p class=m>Surface terrière individuelle g = π × D² / 40000 (D en cm). " + esc(VOL_AIDE) + " Chaque tronc de 7,5 cm et plus compte, y compris dans les cépées. " +
     "Hauteurs non mesurées estimées par une courbe de hauteur par essence, H = a + b × ln(D). " +
     "Valeurs de chaque placette ramenées à l'hectare (surface utile, corrigée en lisière), moyenne entre placettes, marge d'erreur par la loi de Student bilatérale à " + fmt(a.conf * 100, 0) + " %" + (isFinite(a.Npop) ? " avec correction de population finie (N = " + fmt(a.Npop, 1) + " placettes possibles)" : "") + ", " +
     "puis extrapolation : moyenne à l'hectare × surface de la parcelle. Avec des placettes de même surface, c'est la méthode moyenne par placette × F du fichier Excel de référence.</p></html>";
@@ -4380,11 +4380,11 @@ function renderHelp() {
   const nc = $("#noteCoefsAide"); if (nc) nc.textContent = NOTE_COEFS;
   const steps = [
     ["Lecture des mesures", "Avec Arboreal (méthode de référence) : samples.csv donne les placettes et leur surface, trees.csv chaque arbre ; les autres fichiers sont conservés pour la traçabilité. Avec la saisie manuelle (contrôle) : chaque arbre est saisi dans 2 · Mesurer."],
-    ["Seuil et cépées", "Seules les tiges de 7,5 cm de diamètre et plus (circonférence 23,5 cm à 1,30 m) sont comptées. Une cépée compte autant de tiges qu'elle a de tiges d'au moins 7,5 cm, et un seul arbre (souche)."],
+    ["Seuil et cépées", "Seuls les troncs de 7,5 cm de diamètre et plus (circonférence 23,5 cm à 1,30 m) sont comptés. Une cépée compte autant de troncs qu'elle a de troncs d'au moins 7,5 cm, et un seul arbre (souche)."],
     ["Hauteurs", "Les hauteurs mesurées (2 à 3 par placette) sont gardées telles quelles. Les autres sont estimées par la courbe de hauteur de l'essence, H = a + b × ln(D), ajustée par moindres carrés sur les arbres mesurés ; sous 12 hauteurs mesurées, la courbe est signalée peu fiable."],
-    ["Calcul par tige", "g = π × D² / 40000 puis V = g × H × f : volume bois fort tige, du sol jusqu'à une découpe de 7 cm de diamètre, avec le coefficient de forme publié de l'essence (onglet Essences). Le diamètre est en centimètres."],
+    ["Calcul par tronc", "g = π × D² / 40000 puis V = g × H × f : volume bois fort tige, du sol jusqu'à une découpe de 7 cm de diamètre, avec le coefficient de forme publié de l'essence (onglet Essences). Le diamètre est en centimètres."],
     ["Surface utile de la placette", "Surface mesurée de la placette (rayon standard ou réduit), réduite à la partie du cercle située dans la forêt quand la placette déborde de la lisière (sauf si le bois continue au-delà)."],
-    ["Valeurs à l'hectare", "Pour chaque placette : nombre de tiges, somme des g et somme des V, divisés par sa surface utile puis ramenés à l'hectare."],
+    ["Valeurs à l'hectare", "Pour chaque placette : nombre de troncs, somme des g et somme des V, divisés par sa surface utile puis ramenés à l'hectare."],
     ["Moyenne et marge d'erreur", "Moyenne des placettes, écart-type d'échantillon, erreur type (× √(1 - n/N) avec la correction de population finie), puis marge = t × erreur type avec la loi de Student (niveau de confiance choisi dans Réglages)."],
     ["Extrapolation", "Moyenne à l'hectare × surface de la parcelle en hectares. Avec des placettes toutes de même surface, c'est la méthode du fichier Excel : moyenne par placette × F, F = surface de la parcelle / surface d'une placette. En inventaire en plein, pas d'extrapolation : les totaux sont des sommes, sans erreur d'échantillonnage."]
   ];
@@ -4403,7 +4403,7 @@ function renderHelp() {
     "<p><b>Arboreal Forest (méthode de référence)</b> : nommez chaque placette Arboreal avec son numéro du plan, puis faites un seul export de la session en fin de journée. L'application accepte les cinq fichiers exportés par Arboreal Forest. <b>samples.csv</b> et <b>trees.csv</b> suffisent à tous les calculs.</p>" +
     "<ul><li><b>samples.csv</b> : une ligne par placette (identifiant, surface réellement mesurée, rayon, position du centre).</li>" +
     "<li><b>trees.csv</b> : une ligne par arbre (placette, essence, diamètre à 1,30 m en cm, hauteur en m, coordonnées locales et GPS).</li>" +
-    "<li><b>stems.csv</b> : une ligne par tige. Conservé tel quel ; un arbre à plusieurs tiges n'est compté qu'une fois, à partir de trees.csv.</li>" +
+    "<li><b>stems.csv</b> : une ligne par tronc. Conservé tel quel ; un arbre à plusieurs troncs n'est compté qu'une fois, à partir de trees.csv.</li>" +
     "<li><b>heights.csv</b> : les mesures de hauteur effectivement réalisées. Sert à repérer les hauteurs recopiées d'un arbre à l'autre.</li>" +
     "<li><b>calculations.csv</b> : agrégats déjà calculés par l'application, en valeurs par hectare. Utilisés uniquement comme contrôle, jamais comme source des résultats.</li></ul>" +
     "<p>À l'import, chaque placette Arboreal est rattachée au plan de l'étape 1 : d'abord par le numéro donné comme nom de placette dans Arboreal, sinon à la placette prévue la plus proche, à " + LINK_MAX_M + " m au plus. Le rattachement se corrige dans « Sorties enregistrées ».</p>" +
@@ -4418,7 +4418,7 @@ function renderHelp() {
     "<li><b>Arrondis.</b> L'Excel arrondit g à 6 décimales et V à 4 avant de sommer. L'application somme les valeurs non arrondies, ce qui peut créer un écart de l'ordre du millième.</li>" +
     "<li><b>Courbe de hauteur.</b> Absente de l'Excel, où chaque arbre a sa hauteur. L'application estime les hauteurs non mesurées à partir du diamètre.</li>" +
     "<li><b>Coefficients de forme.</b> L'Excel utilisait des valeurs sans source documentée (Chêne 0,50 ; Merisier 0,48 ; Charme 0,52 ; Peuplier 0,55…). L'application utilise des coefficients tirés d'équations publiées de volume bois fort tige (onglet Essences). Un projet ancien resté aux valeurs de l'Excel est mis à jour à l'ouverture ; un coefficient modifié à la main est gardé. Les 23 arbres de l'exemple fictif donnent donc un volume différent de l'Excel ; les tests de non-régression reprennent les anciennes valeurs.</li>" +
-    "<li><b>Seuil de 7,5 cm et cépées.</b> Absents de l'Excel. Les tiges de moins de 7,5 cm de diamètre ne sont pas comptées ; chaque tige d'une cépée compte comme une tige.</li>" +
+    "<li><b>Seuil de 7,5 cm et cépées.</b> Absents de l'Excel. Les troncs de moins de 7,5 cm de diamètre ne sont pas comptés ; chaque tronc d'une cépée compte comme un tronc.</li>" +
     "<li><b>Analyse par essence.</b> Absente de l'Excel, ajoutée à titre d'information. Elle ne rend pas le total plus précis.</li>" +
     "<li><b>Plan de placettes, guidage et campagnes répétées.</b> Absents de l'Excel.</li></ul>";
 }
@@ -4967,7 +4967,7 @@ function fxRayonStep(rStd) {
   red.addEventListener("input", () => { aRed.textContent = aire(red.value); });
   const blocRed = el("div", { id: "fxRadRedBox", hidden: true, style: "display:flex; flex-direction:column; gap:6px" }, [
     el("label", { class: "f", for: "fxRadRed" }, [el("span", null, ["Rayon réduit (m) ", aRed]), red]),
-    el("p", { class: "hint", style: "margin:0", text: "Placette trop longue à mesurer (beaucoup de tiges) : réduisez son rayon, jamais le seuil de 7,5 cm. Le calcul à l'hectare utilise la surface réelle de chaque placette." })
+    el("p", { class: "hint", style: "margin:0", text: "Placette trop longue à mesurer (beaucoup de troncs) : réduisez son rayon, jamais le seuil de 7,5 cm. Le calcul à l'hectare utilise la surface réelle de chaque placette." })
   ]);
   const seg = el("div", { class: "seg", id: "fxRmode", role: "group", "aria-label": "Rayon de la placette" });
   [["std", "Rayon standard"], ["reduit", "Rayon réduit"]].forEach(([v, t]) => seg.appendChild(el("button", {
@@ -5106,7 +5106,7 @@ function renderFxPlot(body, ss, plot) {
   const edge = plotEdge(plot);
   const zone = isZoneRow(plot), ref = zone && !!state.config.refZone;   // inventaire en plein, zone de référence
 
-  const compte = souches.length + " arbre" + (souches.length > 1 ? "s" : "") + (trees.length !== souches.length ? ", " + trees.length + " tiges" : "");
+  const compte = souches.length + " arbre" + (souches.length > 1 ? "s" : "") + (trees.length !== souches.length ? ", " + trees.length + " troncs" : "");
   const head = el("div", { class: "fx-bar" }, zone ? [
     el("span", { class: "ttl", text: ref ? "Zone de référence 50 × 50 m" : "Inventaire en plein" }),
     el("span", { class: "chip", text: compte }),
@@ -5178,14 +5178,14 @@ function renderFxPlot(body, ss, plot) {
   const nSouche = modeTige ? souches.indexOf(soucheCible) + 1 : 0;
   const rangTige = modeTige ? (editing && clean(editing.souche_id) ? num(editing.stem_n) : tigesDe(soucheCible.tree_id).reduce((m, t) => Math.max(m, num(t.stem_n) || 1), 1) + 1) : 0;
   const form = el("div", { class: "card" }, [
-    el("h3", { class: "blk", text: modeTige ? (editing ? "Modifier la tige " + rangTige : "Tige n° " + rangTige) + " de l'arbre n° " + nSouche + " (cépée)" : editing ? "Modifier l'arbre" : "Arbre n° " + (souches.length + 1) }),
+    el("h3", { class: "blk", text: modeTige ? (editing ? "Modifier le tronc " + rangTige : "Tronc n° " + rangTige) + " de l'arbre n° " + nSouche + " (cépée)" : editing ? "Modifier l'arbre" : "Arbre n° " + (souches.length + 1) }),
     modeTige ? el("div", { class: "fx-step" }, [el("h4", { text: "Essence" }), el("p", { style: "margin:0", html: "<b>" + fxEsc(soucheCible.fr_name) + "</b> <span class='hint'>(comme l'arbre n° " + nSouche + ")</span>" })])
       : el("div", { class: "fx-step" }, [el("h4", { text: "Essence" }), spBox]),
     el("div", { class: "fx-step" }, [
       el("h4", null, [document.createTextNode("Tronc"), el("span", { class: "rd", id: "fxDRead" })]),
       el("label", { class: "f", for: "fxTrunk" }, [trunkLab, el("input", { id: "fxTrunk", type: "text", inputmode: "decimal", autocomplete: "off", class: "fx-big", value: d.trunk || "" })])
     ]),
-    modeTige ? el("div", { class: "fx-step" }, [el("h4", { text: "Position" }), el("p", { class: "hint", style: "margin:0", text: "Même position que l'arbre n° " + nSouche + (zone ? (soucheCible.carre ? ", carré " + soucheCible.carre : "") : " : " + fmt(num(soucheCible.distance), 2) + " m à " + Math.round(num(soucheCible.azimuth)) + "°") + ". Chaque tige de 7,5 cm et plus compte comme une tige ; la souche reste un seul arbre." })])
+    modeTige ? el("div", { class: "fx-step" }, [el("h4", { text: "Position" }), el("p", { class: "hint", style: "margin:0", text: "Même position que l'arbre n° " + nSouche + (zone ? (soucheCible.carre ? ", carré " + soucheCible.carre : "") : " : " + fmt(num(soucheCible.distance), 2) + " m à " + Math.round(num(soucheCible.azimuth)) + "°") + ". Chaque tronc de 7,5 cm et plus compte ; la souche reste un seul arbre." })])
     : zone ? (ref ? el("div", { class: "fx-step" }, [
       el("h4", { text: "Carré (facultatif)" }),
       el("label", { class: "f", for: "fxCarre" }, ["Carré de 10 × 10 m où se trouve l'arbre", (() => {
@@ -5221,8 +5221,8 @@ function renderFxPlot(body, ss, plot) {
     ]),
     el("div", { id: "fxErr" }),
     el("div", { style: "display:flex; flex-direction:column; gap:8px; margin-top:6px" }, [
-      el("button", { class: "btn primary fx-save", type: "button", id: "fxSave", text: editing ? "Enregistrer la modification" : modeTige ? "Enregistrer la tige" : "Enregistrer l'arbre" }),
-      editing || modeTige ? el("button", { class: "btn", type: "button", text: editing ? "Annuler la modification" : "Annuler la tige", onclick: () => { state.field.editing = null; state.field.stemOf = null; state.field.draft = {}; renderTerrain(); } }) : null
+      el("button", { class: "btn primary fx-save", type: "button", id: "fxSave", text: editing ? "Enregistrer la modification" : modeTige ? "Enregistrer le tronc" : "Enregistrer l'arbre" }),
+      editing || modeTige ? el("button", { class: "btn", type: "button", text: editing ? "Annuler la modification" : "Annuler le tronc", onclick: () => { state.field.editing = null; state.field.stemOf = null; state.field.draft = {}; renderTerrain(); } }) : null
     ])
   ]);
 
@@ -5244,16 +5244,16 @@ function renderFxPlot(body, ss, plot) {
     const repos = () => {
       box.innerHTML = "";
       box.appendChild(el("button", { class: "btn sm ghost", type: "button", text: "Modifier", onclick: () => { state.field.editing = t.tree_id; state.field.stemOf = null; state.field.draft = {}; renderTerrain(); window.scrollTo({ top: 0 }); } }));
-      if (estSouche) box.appendChild(el("button", { class: "btn sm ghost", type: "button", text: "Ajouter une tige", title: "Cépée : une autre tige sur la même souche (même position, même essence)", onclick: () => { state.field.stemOf = t.tree_id; state.field.editing = null; state.field.draft = { L: state.field.draft.L || "" }; state.field.hMode = "later"; renderTerrain(); window.scrollTo({ top: 0 }); } }));
+      if (estSouche) box.appendChild(el("button", { class: "btn sm ghost", type: "button", text: "Ajouter un tronc", title: "Cépée : un autre tronc sur la même souche (même position, même essence)", onclick: () => { state.field.stemOf = t.tree_id; state.field.editing = null; state.field.draft = { L: state.field.draft.L || "" }; state.field.hMode = "later"; renderTerrain(); window.scrollTo({ top: 0 }); } }));
       box.appendChild(el("button", { class: "btn sm ghost", type: "button", text: "Supprimer", onclick: () => {
         box.innerHTML = "";
         box.appendChild(el("button", { class: "btn sm", type: "button", text: "Annuler", onclick: repos }));
-        box.appendChild(el("button", { class: "btn sm primary", type: "button", text: autres.length ? "Supprimer l'arbre et ses " + (autres.length + 1) + " tiges" : "Confirmer", onclick: () => {
+        box.appendChild(el("button", { class: "btn sm primary", type: "button", text: autres.length ? "Supprimer l'arbre et ses " + (autres.length + 1) + " troncs" : "Confirmer", onclick: () => {
           const ids = new Set([t.tree_id].concat(autres.map(o => o.tree_id)));
           ss.trees = ss.trees.filter(o => !ids.has(o.tree_id));
           if (ids.has(state.field.editing)) { state.field.editing = null; state.field.draft = {}; }
           if (ids.has(state.field.stemOf)) state.field.stemOf = null;
-          renderAll(); toast(estSouche ? "Arbre supprimé" : "Tige supprimée");
+          renderAll(); toast(estSouche ? "Arbre supprimé" : "Tronc supprimé");
         } }));
       } }));
     };
@@ -5265,14 +5265,14 @@ function renderFxPlot(body, ss, plot) {
     list.appendChild(el("div", { class: "fx-row" }, [
       el("span", { class: "n", text: String(i) }),
       el("div", { style: "min-width:0" }, [
-        el("div", null, [el("span", { class: "swatch", style: "background:" + speciesColor(t.fr_name) }), el("b", { text: t.fr_name }), st.length ? el("span", { class: "chip", style: "margin-left:6px", text: "cépée, " + (st.length + 1) + " tiges" }) : null]),
-        el("div", { class: "m", text: (st.length ? "tige 1 : " : "") + "D " + fmt(num(t.diameter), 1) + " cm · " + hTxt(t) + (zone ? (t.carre ? " · carré " + t.carre : "") : " · " + fmt(num(t.distance), 2) + " m à " + Math.round(num(t.azimuth)) + "°") })
+        el("div", null, [el("span", { class: "swatch", style: "background:" + speciesColor(t.fr_name) }), el("b", { text: t.fr_name }), st.length ? el("span", { class: "chip", style: "margin-left:6px", text: "cépée, " + (st.length + 1) + " troncs" }) : null]),
+        el("div", { class: "m", text: (st.length ? "tronc 1 : " : "") + "D " + fmt(num(t.diameter), 1) + " cm · " + hTxt(t) + (zone ? (t.carre ? " · carré " + t.carre : "") : " · " + fmt(num(t.distance), 2) + " m à " + Math.round(num(t.azimuth)) + "°") })
       ]),
       actions(t, true)
     ]));
     st.forEach(s => list.appendChild(el("div", { class: "fx-row tige" }, [
       el("span", { class: "n", text: "↳" }),
-      el("div", { class: "m", text: "tige " + (num(s.stem_n) || "") + " : D " + fmt(num(s.diameter), 1) + " cm · " + hTxt(s) }),
+      el("div", { class: "m", text: "tronc " + (num(s.stem_n) || "") + " : D " + fmt(num(s.diameter), 1) + " cm · " + hTxt(s) }),
       actions(s, false)
     ])));
   });
@@ -5321,7 +5321,7 @@ function renderFxPlot(body, ss, plot) {
     state.field.draft = { sp: editing || modeTige ? "" : keepSp, L: f.hMode === "clino" ? f.L : "", carre: f.carre };
     if (modeTige) state.field.draft.sp = keepSp;
     renderAll();
-    toast(modeTige ? "Tige " + rangTige + " de l'arbre n° " + nSouche + " enregistrée" : editing ? "Arbre modifié" : "Arbre n° " + (souches.length + 1) + " enregistré");
+    toast(modeTige ? "Tronc " + rangTige + " de l'arbre n° " + nSouche + " enregistré" : editing ? "Arbre modifié" : "Arbre n° " + (souches.length + 1) + " enregistré");
     const tr = $("#fxTrunk"); if (tr) try { tr.focus({ preventScroll: true }); } catch (e) { }
   };
   $("#fxSave").addEventListener("click", () => doSave(false));
@@ -6794,14 +6794,14 @@ function pleinEtape() {
   ]));
   /* temps de terrain : nombre d'arbres attendu × durée par arbre */
   const t = tempsPlein();
-  const densIn = el("input", { type: "number", min: "1", step: "10", value: num(state.config.densitePlein) > 0 ? String(num(state.config.densitePlein)) : "", placeholder: "tiges/ha", style: "width:110px", "aria-label": "Densité attendue (tiges par hectare)" });
+  const densIn = el("input", { type: "number", min: "1", step: "10", value: num(state.config.densitePlein) > 0 ? String(num(state.config.densitePlein)) : "", placeholder: "troncs/ha", style: "width:110px", "aria-label": "Densité attendue (troncs par hectare)" });
   densIn.addEventListener("change", () => { const v = num(densIn.value); state.config.densitePlein = v > 0 ? v : ""; renderAll(); });
   const tb = el("div", { class: "card-lite", style: "display:flex; flex-direction:column; gap:8px" });
   if (isFinite(t.heures)) tb.appendChild(el("div", { html: "<b>Temps de terrain :</b> " + fxEsc(phraseTemps(t, pluriel(Math.round(t.nArbres), "arbre"))) + "." }));
-  else tb.appendChild(el("div", { html: "<b>Temps de terrain :</b> indiquez la densité attendue (nombre de tiges par hectare) pour l'estimer. Aucune valeur n'est supposée par défaut." }));
+  else tb.appendChild(el("div", { html: "<b>Temps de terrain :</b> indiquez la densité attendue (nombre de troncs par hectare) pour l'estimer. Aucune valeur n'est supposée par défaut." }));
   tb.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px" }, t.densSrc && t.densSrc !== "saisie"
-    ? [el("span", { class: "hint", text: "Densité " + t.densSrc + " : " + fmt(t.dens, 0) + " tiges/ha." })]
-    : [el("span", { text: "Densité attendue" }), densIn, el("span", { class: "hint", text: "tiges/ha" })]));
+    ? [el("span", { class: "hint", text: "Densité " + t.densSrc + " : " + fmt(t.dens, 0) + " troncs/ha." })]
+    : [el("span", { text: "Densité attendue" }), densIn, el("span", { class: "hint", text: "troncs/ha" })]));
   tb.appendChild(el("p", { class: "hint", style: "margin:0", text: "Hypothèses ajustables dans Réglages : " + fmt(t.h.minA, 1) + " min par arbre, " + fmt(t.h.hJ, 1) + " h de terrain par jour, équipe de " + pluriel(t.h.pers, "personne") + "." }));
   k.push(tb);
   k.push(el("div", { class: "pl-tools" }, [el("button", {
