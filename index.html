@@ -1083,7 +1083,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <button class="voie" type="button" data-voie="foresteye" aria-pressed="false">
       <i class="voie-tag">Contrôle ou sans abonnement</i>
       <b>Saisie manuelle dans ForestEye</b>
-      <span>Ruban ou compas forestier, décamètre, clinomètre ou téléphone. Chaque arbre est saisi directement ici, placette par placette. Sert à contrôler quelques arbres mesurés par Arboreal, ou à tout mesurer sans abonnement.</span>
+      <span>Ruban, décamètre, clinomètre ou téléphone. Chaque arbre est saisi directement ici, placette par placette. Sert à contrôler quelques arbres mesurés par Arboreal, ou à tout mesurer sans abonnement.</span>
     </button>
   </div>
 
@@ -1101,9 +1101,9 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <b>Sur le terrain avec Arboreal</b>
         <ol style="margin:6px 0 8px; padding-left:20px">
           <li>Une session Arboreal par journée.</li>
-          <li>Sur chaque placette du plan, créez une placette Arboreal <b>nommée avec son numéro</b> (« 7 » pour la n° 7) : c'est lui qui rattache les arbres à la bonne placette.</li>
+          <li>Sur chaque placette du plan, créez une placette Arboreal <b>nommée avec son numéro</b> (« 7 » pour la n° 7) : c'est lui qui rattache les arbres à la bonne placette. Sinon, le rattachement se fait par le point GPS, peu précis sous les arbres.</li>
           <li>Une placette Arboreal = une seule placette du plan.</li>
-          <li><b>En fin de journée</b>, exportez la session et déposez les fichiers ci-dessous. Un export à midi sert de sauvegarde.</li>
+          <li><b>En fin de journée</b>, exportez la session et déposez les fichiers ci-dessous.</li>
         </ol>
         <p style="margin:0">En lisière, seulement les arbres côté forêt. Arboreal mesure une hauteur par placette : elle suffit dans une plantation homogène ; sinon, complétez 2 à 3 hauteurs par placette à l'étape b.</p>
       </div>
@@ -1143,10 +1143,10 @@ input.fx-big{font-size:18px; padding:10px 12px}
       <dl class="gloss">
         <div><dt>Centre de placette</dt><dd>Le centre est matérialisé le temps de la mesure seulement (jalon ou piquet temporaire, retiré à la fin : aucune trace). Restez immobile au centre pendant le relevé GPS. L'application fait la moyenne des positions reçues pendant une minute, ce qui lisse les sauts du signal sous les arbres. Elle ne corrige pas un décalage constant du GPS : la précision affichée reste celle d'une mesure isolée.</dd></div>
         <div><dt>Arbres à inclure</dt><dd>Un arbre compte si le centre de son tronc est à moins d'un rayon du centre de la placette (7,98 m pour 200 m²), s'il est dans la forêt et si son diamètre atteint 7,5 cm (circonférence 23,5 cm). Mesurez la distance au décamètre, du centre jusqu'au tronc, et ajoutez la moitié du diamètre.</dd></div>
-        <div><dt>Azimut</dt><dd>Direction de l'arbre vue depuis le centre de la placette, en degrés depuis le nord (90 = est). Avec le téléphone : tenez-le à plat, bord supérieur pointé vers l'arbre, loin de tout objet métallique. La déclinaison magnétique, de l'ordre d'un degré en Charente-Maritime, est négligeable à l'échelle d'une placette.</dd></div>
-        <div><dt>Tronc</dt><dd>À 1,30 m du sol, côté amont si le terrain est en pente. Au ruban, saisissez la circonférence : l'application la convertit en diamètre (D = C / π). Au compas forestier, saisissez directement le diamètre.</dd></div>
-        <div><dt>Hauteur au clinomètre</dt><dd>Placez-vous là où le sommet et le pied sont visibles, mesurez la distance horizontale jusqu'au tronc, puis visez le sommet et le pied. <span class="formula">H = L × (tan αsommet - tan αpied)</span>. L'angle vers le pied est négatif quand on regarde vers le bas. Pas besoin de reculer loin : à une distance égale à la moitié de la hauteur (angle d'environ 63°), l'erreur n'est que 15 % plus forte qu'à 45°. Au-delà de 70°, reculez.</dd></div>
-        <div><dt>Combien de hauteurs mesurer ?</dt><dd>Le diamètre se mesure sur tous les arbres, la hauteur sur 2 à 3 arbres par placette, de grosseurs différentes (un fin, un moyen, un gros), choisis là où le sommet est visible. Sur la campagne, visez au moins 12 à 15 hauteurs par essence. L'application ajuste une courbe hauteur-diamètre par essence et estime la hauteur des autres arbres à partir de leur diamètre ; sous 12 hauteurs mesurées, elle signale que la courbe est peu fiable. Avec Arboreal, c'est l'étape « b · Compléter les hauteurs ». Exception : dans une plantation homogène, la hauteur unique mesurée par Arboreal sur chaque placette suffit (limite à signaler).</dd></div>
+        <div><dt>Direction de l'arbre (azimut)</dt><dd>Sert à placer l'arbre sur la carte. Debout au centre de la placette, c'est l'angle entre le nord et l'arbre, lu à la boussole : 0 = nord, 90 = est, 180 = sud, 270 = ouest. Avec le téléphone : tenez-le à plat, le haut pointé vers l'arbre, loin de tout objet en métal.</dd></div>
+        <div><dt>Tronc</dt><dd>À 1,30 m du sol, côté amont si le terrain est en pente. Mesurez le tour du tronc au ruban : l'application en déduit le diamètre.</dd></div>
+        <div><dt>Mesurer une hauteur</dt><dd>Reculez jusqu'à voir le pied et la cime de l'arbre, à environ la moitié de sa hauteur (10 m pour un arbre de 20 m). Mesurez votre distance au tronc, puis visez la cime et le pied avec le clinomètre ou le téléphone (vers le bas, l'angle est négatif) : l'application calcule la hauteur. Si vous devez lever la tête presque à la verticale, reculez encore.</dd></div>
+        <div><dt>Combien de hauteurs mesurer ?</dt><dd>Le tour du tronc se mesure sur tous les arbres. La hauteur, seulement sur 2 à 3 arbres par placette : un fin, un moyen, un gros. L'application en déduit la hauteur des autres d'après leur grosseur ; pour que ce soit fiable, il lui faut au moins 12 à 15 hauteurs par essence sur toute la campagne. Avec Arboreal, ces hauteurs s'ajoutent à l'étape « b · Compléter les hauteurs ». Dans une plantation où tous les arbres se ressemblent (même essence, même âge), la hauteur mesurée par Arboreal sur chaque placette suffit.</dd></div>
       </dl>
     </div>
   </details>
@@ -1571,7 +1571,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div class="card">
     <h3 class="blk">Deux façons de mesurer</h3>
     <dl class="gloss" style="margin-top:14px">
-      <div><dt>Saisie manuelle dans ForestEye : le contrôle, sans abonnement</dt><dd>Sert à contrôler les mesures d'Arboreal sur quelques arbres, ou à tout mesurer sans abonnement. On saisit chaque arbre dans 2 · Mesurer : essence, circonférence au ruban (ou diamètre au compas), distance et direction depuis le centre de la placette, hauteur au clinomètre pour quelques arbres. Le matériel suffit : ruban, décamètre, clinomètre ou téléphone. Aucun abonnement.</dd></div>
+      <div><dt>Saisie manuelle dans ForestEye : le contrôle, sans abonnement</dt><dd>Sert à contrôler les mesures d'Arboreal sur quelques arbres, ou à tout mesurer sans abonnement. On saisit chaque arbre dans 2 · Mesurer : essence, circonférence au ruban, distance et direction depuis le centre de la placette, hauteur au clinomètre pour quelques arbres. Le matériel suffit : ruban, décamètre, clinomètre ou téléphone. Aucun abonnement.</dd></div>
       <div><dt>Avec Arboreal Forest : la méthode de référence</dt><dd>Plus rapide, plus facile et plus intuitive. L'application Arboreal mesure le diamètre et la position des arbres en réalité augmentée. Elle demande un abonnement payant de courte durée : une semaine suffit pour une campagne (tarif à vérifier sur l'App Store). Les diamètres sont plus précis avec un iPhone équipé d'un capteur LiDAR. Les fichiers exportés s'importent dans 2 · Mesurer, puis on complète les hauteurs au clinomètre.</dd></div>
     </dl>
   </div>
