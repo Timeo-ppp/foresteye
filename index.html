@@ -3453,8 +3453,6 @@ function relChip(ePct) {
   if (ePct <= th * 2) return el("span", { class: "chip warn" }, [el("span", { class: "dot" }), document.createTextNode("marge trop large")]);
   return el("span", { class: "chip crit" }, [el("span", { class: "dot" }), document.createTextNode("très insuffisant")]);
 }
-/* « 9 chances sur 10 » pour une confiance de 90 % */
-function chances() { return fmt(state.config.conf * 10, state.config.conf * 10 % 1 ? 1 : 0) + " chances sur 10"; }
 function confLabel() { return "confiance " + fmt(state.config.conf * 100, 0) + " %"; }
 function statTable(rows) {
   const tw = el("div", { class: "tbl-wrap" });
@@ -3481,7 +3479,7 @@ function statTable(rows) {
 /* rappel : la marge ne compte que l'erreur d'échantillonnage */
 function marginScopeNote(a) {
   const est = allTrees().filter(t => t.hSrc === "courbe" || t.hSrc === "moyenne" || t.hSrc === "representative").length;
-  return el("p", { class: "hint", style: "margin:12px 0 0", text: "D'où vient la marge : on n'a pas mesuré toute la forêt, seulement quelques placettes ; d'autres placettes auraient donné un chiffre un peu différent. Elle ne compte pas les petites erreurs de mesure, l'incertitude du coefficient de forme" + (est ? ", ni celle des " + est + " hauteurs non mesurées arbre par arbre" : "") + " : l'écart réel peut être un peu plus large." });
+  return el("p", { class: "hint", style: "margin:12px 0 0", text: "La marge ne compte que le hasard de l'échantillonnage (l'endroit où tombent les placettes). Elle n'inclut ni les erreurs de mesure, ni les coefficients de forme" + (est ? ", ni l'erreur des " + est + " hauteurs estimées" : "") + " : l'écart réel peut être un peu plus large." });
 }
 function renderStats() {
   const a = analysis();
@@ -3627,8 +3625,8 @@ function renderResult() {
     card.appendChild(el("div", { class: "kpi-val", html: fmt(val, plein && it.dec === 1 ? 2 : it.dec) + (it.unit ? ' <span class="unit">' + it.unit + "</span>" : "") }));
     if (plein) card.appendChild(el("span", { class: "sub", text: MSG_PLEIN }));
     else {
-      card.appendChild(el("span", { class: "sub", text: isFinite(e) ? "marge ± " + fmt(e, 1) + " %" : "marge non calculable" }));
-      if (isFinite(e) && isFinite(dl)) card.appendChild(el("span", { class: "sub", text: chances() + " entre " + fmt(Math.max(0, val - dl), it.dec) + " et " + fmt(val + dl, it.dec) + (it.unit ? " " + it.unit : "") }));
+      card.appendChild(el("span", { class: "sub", text: isFinite(e) ? "± " + fmt(e, 1) + " % (" + confLabel() + ")" : "marge non calculable" }));
+      if (isFinite(e) && isFinite(dl)) card.appendChild(el("span", { class: "sub", text: "entre " + fmt(Math.max(0, val - dl), it.dec) + " et " + fmt(val + dl, it.dec) + (it.unit ? " " + it.unit : "") }));
     }
     if (it.k === "n" && cepees && isFinite(nArbres)) card.appendChild(el("span", { class: "sub", text: (plein ? "soit " : "soit environ ") + fmt(nArbres, 0) + (Math.round(nArbres) > 1 ? " arbres (souches)" : " arbre (souche)") + ", cépées comprises" }));
     if (it.k === "v" && pi.noms.length) card.appendChild(el("span", { class: "sub", style: "color:var(--warn-ink)", text: "Volume " + mentionIndicative(pi) }));
@@ -3654,7 +3652,7 @@ function renderResult() {
   }));
   const tw = el("div", { class: "tbl-wrap" });
   const t = el("table");
-  t.innerHTML = "<thead><tr><th>Mesure</th><th class='num'>Pour 1 hectare</th><th class='num'>× surface (ha)</th><th class='num'>Toute la parcelle</th><th class='num'>" + chances() + " entre</th><th class='num'>Marge</th><th>Objectif</th></tr></thead>";
+  t.innerHTML = "<thead><tr><th>Mesure</th><th class='num'>Pour 1 hectare</th><th class='num'>× surface (ha)</th><th class='num'>Toute la parcelle</th><th class='num'>Intervalle (" + confLabel() + ")</th><th class='num'>Marge</th><th>Objectif</th></tr></thead>";
   const b = el("tbody");
   items.forEach(it => {
     const v = it.stat.mean * F, dl = it.stat.delta * F;
@@ -3699,8 +3697,9 @@ function renderResult() {
   }
 
   // comparaison avec les agrégats natifs de l'application
+  // 19/11/2026 : comparaison retirée de Résultat à la demande de Timéo (le code reste, désactivé)
   const calcs = state.sessions.flatMap(s => s.calculations || []);
-  if (calcs.length) {
+  if (false && calcs.length) {
     const det = el("details", { class: "acc" });
     det.appendChild(el("summary", { text: "Comparer avec le calcul d'Arboreal (vérification)" }));
     const dv = el("div");
