@@ -3923,22 +3923,18 @@ function renderMap() {
   if (state.config.posMode === "gps" && isFinite(medAcc) && isFinite(medR) && medAcc > medR) {
     notice.insertAdjacentHTML("beforeend", '<div class="note warn"><b>Le GPS est moins précis que la placette elle-même.</b>' +
       '<p>Précision médiane annoncée : ± ' + fmt(medAcc, 1) + ' m, pour un rayon de placette de ' + fmt(medR, 1) + ' m. Sous couvert forestier, c\'est normal. Les arbres apparaissent donc dispersés bien au-delà du cercle réel.</p>' +
-      '<p>Le mode <b>repère local de la placette</b> utilise les coordonnées relatives relevées par l\'application terrain (précision centimétrique) et replace chaque arbre au bon endroit dans le cercle. Il faut alors renseigner l\'orientation du repère.</p></div>');
+      '<p>Choisissez plutôt <b>Centre du plan + position relative</b> : chaque arbre est replacé au bon endroit dans son cercle, et l\'orientation est corrigée automatiquement.</p></div>');
   }
   if (state.config.posMode !== "gps") {
     const nPlan = plots.filter(p => p.centreSrc === "plan").length, nArb = plots.filter(p => !p.raw.field && p.centreSrc !== "plan").length;
     const ecarts = plots.filter(p => p.centreSrc === "plan" && isFinite(p.latArb)).map(p => plDistBearing([p.latArb, p.lonArb], [p.lat, p.lon]).d).sort((a, b) => a - b);
-    notice.insertAdjacentHTML("beforeend", '<div class="note info">Chaque arbre est placé à partir de sa position relative au centre de la placette, mesurée par Arboreal (au centimètre), et non de son GPS. ' +
-      (state.config.posMode === "plan"
-        ? 'Centre utilisé : <b>le centre prévu du plan</b>, rejoint avec le guidage GPS' + (nPlan ? ' (' + nPlan + ' placette' + (nPlan > 1 ? 's' : '') + (ecarts.length ? ' ; écart médian avec le centre relevé par Arboreal : ' + fmt(ecarts[Math.floor(ecarts.length / 2)], 0) + ' m, au plus ' + fmt(ecarts[ecarts.length - 1], 0) + ' m' : '') + ')' : '') + '.' + (nArb ? ' ' + nArb + ' placette' + (nArb > 1 ? 's' : '') + ' non rattachée' + (nArb > 1 ? 's' : '') + ' au plan : centre Arboreal.' : '')
-        : 'Centre utilisé : le centre relevé par Arboreal.') +
-      ' ' + (() => {
-        const rs = plots.filter(p => !p.raw.field).map(p => plotRotAuto(p)), ok = rs.filter(r => r.ok);
-        const degs = ok.map(r => r.deg > 180 ? r.deg - 360 : r.deg).sort((a, b) => a - b);
-        return 'Orientation <b>redressée automatiquement</b> pour ' + ok.length + ' placette' + (ok.length > 1 ? 's' : '') + ' sur ' + rs.length + ' d\'après le GPS des arbres' +
-          (degs.length ? ' (rotation de ' + fmt(degs[0], 0) + '° à ' + fmt(degs[degs.length - 1], 0) + '°, écart résiduel médian ' + fmt(ok.map(r => r.resid).sort((a, b) => a - b)[Math.floor(ok.length / 2)], 1) + ' m)' : '') + '.' +
-          (rs.length > ok.length ? ' Les autres (moins de 3 arbres ou GPS trop dispersé) gardent le repère tel quel.' : '');
-      })() + ' Les calculs (volumes, marges) n\'utilisent pas les positions.</div>');
+    const nRot = plots.filter(p => !p.raw.field).map(p => plotRotAuto(p)).filter(r => r.ok).length;
+    notice.insertAdjacentHTML("beforeend", '<div class="note info">Chaque arbre est placé depuis ' +
+      (state.config.posMode === "plan" ? '<b>le centre prévu de sa placette</b>' : '<b>le centre de placette relevé par Arboreal</b>') +
+      ', avec sa position mesurée par Arboreal (au centimètre), et non avec son GPS, peu précis sous les arbres.' +
+      (nArb && state.config.posMode === "plan" ? ' ' + nArb + ' placette' + (nArb > 1 ? 's' : '') + ' sans numéro du plan : centre relevé par Arboreal.' : '') +
+      (nRot ? ' L\'orientation de chaque placette est corrigée automatiquement.' : '') +
+      ' Ces positions servent seulement à la carte : elles ne changent aucun calcul.</div>');
   }
   if (!placed && trees.length) notice.insertAdjacentHTML("beforeend", enPlein()
     ? '<div class="note info">Inventaire en plein : les arbres ne sont pas placés un par un, le GPS n\'est pas assez précis pour cela. ' + (state.config.refZone ? 'Pour la zone de référence, chaque arbre est rattaché à son carré : voir le plan ci-dessous.' : '') + '</div>'
