@@ -1578,8 +1578,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
 <!-- ============ AIDE ============ -->
 <section id="p-aide" class="panel" role="tabpanel" hidden>
   <div class="page-head">
-    <h2>Comprendre les résultats</h2>
-    <p>Le vocabulaire forestier et statistique employé dans l'application, en clair.</p>
+    <h2>Aide</h2>
+    <p>Comment marche ForestEye, en quelques mots.</p>
   </div>
 
   <div class="card">
@@ -1590,47 +1590,44 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div class="card">
     <h3 class="blk">Deux façons de mesurer</h3>
     <dl class="gloss" style="margin-top:14px">
-      <div><dt>Saisie manuelle dans ForestEye : le contrôle, sans abonnement</dt><dd>Sert à contrôler les mesures d'Arboreal sur quelques arbres, ou à tout mesurer sans abonnement. On saisit chaque arbre dans 2 · Mesurer : essence, circonférence au ruban, distance et direction depuis le centre de la placette, hauteur au clinomètre pour quelques arbres. Le matériel suffit : ruban, décamètre, clinomètre ou téléphone. Aucun abonnement.</dd></div>
-      <div><dt>Avec Arboreal Forest : la méthode de référence</dt><dd>Plus rapide, plus facile et plus intuitive. L'application Arboreal mesure le diamètre et la position des arbres en réalité augmentée. Elle demande un abonnement payant de courte durée : une semaine suffit pour une campagne (tarif à vérifier sur l'App Store). Les diamètres sont plus précis avec un iPhone équipé d'un capteur LiDAR. Les fichiers exportés s'importent dans 2 · Mesurer, puis on complète les hauteurs au clinomètre.</dd></div>
+      <div><dt>Avec Arboreal Forest (recommandé)</dt><dd>Une application iPhone qui mesure le diamètre et la position des arbres avec la caméra. Dans Arboreal, on mesure aussi la hauteur d'un arbre par placette. On importe ensuite ses fichiers dans 2 · Mesurer. Abonnement payant : une semaine suffit pour une campagne. Les mesures sont plus précises avec un iPhone équipé d'un capteur LiDAR.</dd></div>
+      <div><dt>Saisie manuelle dans ForestEye</dt><dd>Sans abonnement, avec un ruban, un décamètre et un clinomètre (ou le téléphone). On mesure d'abord le tour de chaque tronc, puis la hauteur de 2 à 3 arbres désignés par l'application. Sert aussi à vérifier quelques arbres mesurés par Arboreal.</dd></div>
     </dl>
   </div>
 
   <div class="grid g2">
     <div class="card">
-      <h3 class="blk">Mesures</h3>
+      <h3 class="blk">Les mots à connaître</h3>
       <dl class="gloss" style="margin-top:14px">
-        <div><dt>Placette</dt><dd>Petit cercle de forêt (ici environ 200 m², rayon 7,98 m) où l'on mesure tous les arbres. On en mesure plusieurs, réparties dans la parcelle, plutôt que de mesurer la forêt entière. Une placette trop longue à mesurer peut être prise avec un rayon réduit, choisi en l'ouvrant : le calcul utilise alors sa surface réelle.</dd></div>
-        <div><dt>Diamètre minimal : 7,5 cm</dt><dd>Seuil de l'inventaire forestier national IGN : arbres dont la circonférence à 1,30 m atteint 23,5 cm (diamètre 7,5 cm). Fixe, pour que deux inventaires soient comparables : un arbre plus fin n'est pas compté. Si une placette est trop longue à mesurer, on réduit son rayon, jamais le seuil.</dd></div>
-        <div><dt>Cépée (arbre à plusieurs troncs)</dt><dd>Plusieurs troncs sur une même souche. Chaque tronc d'au moins 7,5 cm compte, dans le nombre de troncs, la surface terrière et le volume ; les troncs d'une même souche restent un seul arbre. Les tableaux donnent les deux : « arbres (souches) » et « troncs ». À la saisie, bouton « Ajouter un tronc » sur l'arbre.</dd></div>
-        <div><dt>DHP, diamètre à hauteur de poitrine</dt><dd>Diamètre du tronc mesuré à 1,30 m du sol, en centimètres. C'est la convention forestière universelle.</dd></div>
-        <div><dt>Surface terrière (g, G)</dt><dd>Surface de la section du tronc à 1,30 m : <span class="formula">g = π × D² / 40000</span>. Additionnée sur une placette puis ramenée à l'hectare, elle donne G en m²/ha, l'indicateur de densité du peuplement.</dd></div>
-        <div><dt>Coefficient de forme (f)</dt><dd>Un tronc est plus fin en haut qu'en bas. f corrige le volume du cylindre théorique : f = V / (g × H). Les valeurs de l'application viennent d'équations publiées de volume de bois (tronc), essence par essence (sources dans l'onglet Essences) ; le Chêne vert et les « Autres » ont une valeur provisoire, leur volume est indicatif. <span id="noteCoefsAide"></span></dd></div>
-        <div><dt>Courbe de hauteur</dt><dd>Relation entre diamètre et hauteur, ajustée pour chaque essence sur les arbres dont la hauteur a été mesurée : <span class="formula">H = a + b × ln(D)</span>. Elle sert à estimer la hauteur des arbres non mesurés. Protocole : la hauteur de 2 à 3 arbres par placette, de grosseurs différentes, pour viser au moins 12 à 15 hauteurs par essence sur la campagne ; en dessous de 12, l'application signale une courbe peu fiable. Avec moins de 3 arbres mesurés, elle prend la hauteur moyenne de l'essence. Chaque arbre indique l'origine de sa hauteur : « mesurée », « estimée (courbe) » ou « estimée (moyenne) ».</dd></div>
-        <div><dt>Volume de bois du tronc (V)</dt><dd><span class="formula">V = g × H × f</span>, en m³ par tronc : le tronc, du sol jusqu'à une découpe de 7 cm de diamètre (définition de l'inventaire forestier national IGN), sans les branches. C'est le volume affiché partout dans l'application.</dd></div>
+        <div><dt>Placette</dt><dd>Un cercle de forêt d'environ 200 m² (7,98 m de rayon) où l'on mesure tous les arbres. On en mesure plusieurs, réparties sur toute la parcelle, au lieu de mesurer toute la forêt. Si une placette a trop d'arbres, on peut réduire son rayon en l'ouvrant : le calcul en tient compte.</dd></div>
+        <div><dt>Arbres comptés : 7,5 cm minimum</dt><dd>Seuls les troncs d'au moins 7,5 cm de diamètre (23,5 cm de tour) à 1,30 m du sol sont comptés. C'est la règle de l'inventaire forestier national (IGN) : elle permet de comparer deux inventaires.</dd></div>
+        <div><dt>Cépée</dt><dd>Un arbre qui a plusieurs troncs sur la même souche. Chaque tronc de 7,5 cm ou plus est compté, mais l'ensemble reste un seul arbre. À la saisie : bouton « Ajouter un tronc ».</dd></div>
+        <div><dt>Diamètre</dt><dd>La grosseur du tronc, mesurée à 1,30 m du sol (hauteur de poitrine). On mesure le tour au ruban : l'application en déduit le diamètre.</dd></div>
+        <div><dt>Surface terrière</dt><dd>Imaginez qu'on coupe tous les arbres à 1,30 m du sol : c'est la somme des surfaces de toutes ces coupes, ramenée à 1 hectare (m²/ha). Elle dit à quel point la forêt est riche en bois.</dd></div>
+        <div><dt>Coefficient de forme</dt><dd>Un tronc n'est pas un cylindre : il s'affine vers le haut. Ce coefficient corrige le calcul du volume. Sa valeur dépend de l'essence et vient de publications scientifiques (onglet Essences). Pour le Chêne vert et « Autres », elle est provisoire : leur volume est indicatif.</dd></div>
+        <div><dt>Hauteur des arbres</dt><dd>On ne mesure la hauteur que de quelques arbres. Pour chaque essence, l'application relie la grosseur du tronc à la hauteur et en déduit celle des autres. Avec Arboreal, dans une plantation où les arbres se ressemblent, la hauteur mesurée sur la placette sert pour tous ses arbres.</dd></div>
+        <div><dt>Volume de bois (tronc)</dt><dd>Le bois du tronc seul, sans les branches, du pied jusqu'à l'endroit où il ne fait plus que 7 cm de diamètre (définition de l'IGN). Calcul : surface de la coupe × hauteur × coefficient de forme.</dd></div>
       </dl>
     </div>
     <div class="card">
-      <h3 class="blk">Précision</h3>
+      <h3 class="blk">La précision</h3>
       <dl class="gloss" style="margin-top:14px">
-        <div><dt>Pourquoi une marge d'erreur ?</dt><dd>On mesure quelques placettes, pas toute la parcelle. Selon l'endroit où elles tombent, le résultat change un peu. La marge d'erreur mesure cet écart possible. Elle ne compte que ce hasard de l'échantillonnage : les erreurs de mesure, les hauteurs estimées par la courbe et les coefficients de forme peuvent l'élargir encore.</dd></div>
-        <div><dt>Écart-type entre placettes</dt><dd>Dit si les placettes se ressemblent. Des placettes très différentes entre elles rendent l'estimation moins sûre.</dd></div>
-        <div><dt>Coefficient de Student (t)</dt><dd>Un facteur qui élargit la marge quand on a peu de placettes. Avec 3 placettes il vaut 2,92 à 90 % ; avec 20 placettes, 1,73. Peu de placettes = marge large.</dd></div>
-        <div><dt>Marge d'erreur ± E %</dt><dd>La marge exprimée en pourcentage du résultat, avec un niveau de confiance (90 % par défaut). « 100 m³ ± 8 % » signifie : avec 90 % de confiance, le volume réel est entre 92 et 108 m³.</dd></div>
-        <div><dt>Objectif de précision : la norme ForestEye</dt><dd>Une marge de <b>± 15 % au plus sur le volume, avec 90 % de confiance</b> : « ± 15 % (confiance 90 %) ». C'est assez précis pour qu'un propriétaire connaisse ce qu'il a, et faisable en une demi-journée à deux. Visez <b>± 10 %</b> seulement si le chiffre sert à une décision d'argent (vente de bois, estimation d'une coupe) : il faut environ deux fois plus de placettes. Descendre sous ± 10 % est inutile : les erreurs que la marge ne compte pas (coefficients de forme, hauteurs estimées, mesures) sont du même ordre. Diviser la marge par 2 demande 4 fois plus de placettes. Les deux chiffres se règlent dans Réglages. Une marge de ± 15 % ne veut pas dire « fiable à 85 % » : elle dit de combien le résultat peut s'écarter de la vraie valeur.</dd></div>
-        <div><dt>Combien de placettes ?</dt><dd>L'étape 1 · Préparer l'estime dès que la forêt est délimitée : <span class="formula">n = (t × CV / E)²</span>, CV étant la variabilité du volume entre placettes et E la marge visée. Avant toute mesure, CV est une hypothèse (50 % par défaut) ; dès 2 placettes mesurées, la variabilité réelle la remplace et l'application signale si l'estimation change. Sur une petite forêt, le nombre est corrigé par <span class="formula">n / (1 + n / N)</span>, N étant le nombre de placettes que contient la forêt.</dd></div>
-        <div><dt>Comment réduire la marge ?</dt><dd>Ajouter des placettes : la marge décroît comme 1/√n. L'étape 1 · Préparer calcule le nombre de placettes nécessaire dès que deux placettes sont mesurées, donne la marge attendue pour un nombre donné et ajoute au plan les placettes manquantes, dans les zones les moins couvertes, sans déplacer celles déjà mesurées. Séparer les essences ne rend pas le total plus précis. Si la forêt a des zones nettement différentes (une peupleraie et une chênaie, par exemple), on peut en faire deux inventaires séparés, un par zone.</dd></div>
-        <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime le temps : nombre de placettes × 30 min, plus la marche entre placettes à 2 km/h, avec 6 h de terrain par jour pour une équipe de 2 personnes (en inventaire en plein : 2 min par arbre). Ces hypothèses se règlent dans Réglages. Dès que des sorties sont enregistrées, la durée réelle d'une placette, calculée d'après l'heure de saisie des arbres, peut remplacer l'hypothèse (bouton « Utiliser la durée mesurée » dans 1 · Préparer).</dd></div>
+        <div><dt>Pourquoi une marge d'erreur ?</dt><dd>On mesure quelques placettes, pas toute la forêt. Avec d'autres placettes, le résultat aurait été un peu différent. La marge dit de combien il peut s'écarter de la vraie valeur.</dd></div>
+        <div><dt>Comment la lire</dt><dd>« 100 m³ ± 8 % (confiance 90 %) » veut dire : il y a 9 chances sur 10 que le vrai volume soit entre 92 et 108 m³.</dd></div>
+        <div><dt>Combien de placettes ?</dt><dd>Plus les placettes se ressemblent, moins il en faut. Avant la sortie, l'étape 1 · Préparer fait une première estimation. Après 5 placettes mesurées, elle la refait avec les vraies mesures et propose d'ajouter ou de retirer des placettes.</dd></div>
+        <div><dt>Comment réduire la marge ?</dt><dd>En mesurant plus de placettes. Mais pour diviser la marge par 2, il en faut 4 fois plus. Si la forêt a des zones très différentes (une peupleraie et une chênaie, par exemple), mieux vaut faire un inventaire par zone.</dd></div>
+        <div><dt>Temps de terrain</dt><dd>Avant la sortie, l'application estime la durée : nombre de placettes × 30 min, plus la marche entre les placettes. La durée par placette et la taille de l'équipe se règlent dans Réglages. Après une première sortie, on peut reprendre la durée réellement mesurée.</dd></div>
       </dl>
     </div>
   </div>
 
   <div class="card">
-    <h3 class="blk">Méthode de calcul, étape par étape</h3>
+    <h3 class="blk">Le calcul, étape par étape</h3>
     <div id="methodSteps" style="margin-top:14px"></div>
   </div>
 
-  <details class="acc"><summary>Format des fichiers attendus</summary><div id="formatHelp"></div></details>
-  <details class="acc"><summary>Écarts assumés avec le fichier Excel de référence</summary><div id="diffHelp"></div></details>
+  <details class="acc" hidden><summary>Format des fichiers attendus</summary><div id="formatHelp"></div></details>
+  <details class="acc" hidden><summary>Écarts assumés avec le fichier Excel de référence</summary><div id="diffHelp"></div></details>
 </section>
 
 </main>
@@ -4370,24 +4367,23 @@ function renderMethodHelp() {
   const box = $("#methodHelp"); if (!box) return;
   const sp = state.config.seuilPleinHa, sg = state.config.seuilGrandHa, f1 = v => fmt(v, v % 1 ? 1 : 0);
   box.innerHTML = "";
-  box.appendChild(el("p", { class: "hint", style: "margin:4px 0 12px", text: "La méthode s'adresse aux forêts trop grandes pour compter tous les arbres à la main, et trop petites pour payer un expert ou un inventaire LiDAR. Dès que la surface est connue, l'étape 1 · Préparer conseille une méthode ; vous pouvez toujours choisir l'autre." }));
+  box.appendChild(el("p", { class: "hint", style: "margin:4px 0 12px", text: "Selon la surface de la forêt, l'étape 1 · Préparer conseille une méthode. Vous pouvez toujours choisir l'autre." }));
   box.appendChild(el("dl", { class: "gloss" }, [
-    el("div", null, [el("dt", { text: "Moins de " + f1(sp) + " ha : comptez tous les arbres" }), el("dd", { text: "Inventaire en plein : chaque arbre de la zone est mesuré. Les totaux sont des sommes : pas de tirage de placettes, pas d'extrapolation, donc pas d'erreur d'échantillonnage." })]),
-    el("div", null, [el("dt", { text: "De " + f1(sp) + " à " + f1(sg) + " ha : mesurez des placettes" }), el("dd", { text: "Des cercles de forêt répartis sur une grille au hasard, où l'on mesure tous les arbres. Le résultat est extrapolé à toute la forêt, avec sa marge d'erreur." })]),
-    el("div", null, [el("dt", { text: "Plus de " + f1(sg) + " ha : placettes, sur plusieurs journées" }), el("dd", { text: "Même méthode, mais le nombre de placettes et la marche entre elles demandent plusieurs journées de terrain : l'application en donne une estimation avant la sortie." })])
+    el("div", null, [el("dt", { text: "Moins de " + f1(sp) + " ha : comptez tous les arbres" }), el("dd", { text: "On mesure chaque arbre. Le résultat est une simple somme, sans marge d'erreur." })]),
+    el("div", null, [el("dt", { text: "De " + f1(sp) + " à " + f1(sg) + " ha : mesurez des placettes" }), el("dd", { text: "On mesure des cercles de forêt répartis au hasard sur toute la parcelle, puis on étend le résultat à toute la forêt, avec une marge d'erreur." })]),
+    el("div", null, [el("dt", { text: "Plus de " + f1(sg) + " ha : placettes, sur plusieurs journées" }), el("dd", { text: "Même méthode, mais il faut plusieurs journées de terrain : l'application les estime avant la sortie." })])
   ]));
 }
 function renderHelp() {
   const nc = $("#noteCoefsAide"); if (nc) nc.textContent = NOTE_COEFS;
   const steps = [
-    ["Lecture des mesures", "Avec Arboreal (méthode de référence) : samples.csv donne les placettes et leur surface, trees.csv chaque arbre ; les autres fichiers sont conservés pour la traçabilité. Avec la saisie manuelle (contrôle) : chaque arbre est saisi dans 2 · Mesurer."],
-    ["Seuil et cépées", "Seuls les troncs de 7,5 cm de diamètre et plus (circonférence 23,5 cm à 1,30 m) sont comptés. Une cépée compte autant de troncs qu'elle a de troncs d'au moins 7,5 cm, et un seul arbre (souche)."],
-    ["Hauteurs", "Les hauteurs mesurées (2 à 3 par placette) sont gardées telles quelles. Les autres sont estimées par la courbe de hauteur de l'essence, H = a + b × ln(D), ajustée par moindres carrés sur les arbres mesurés ; sous 12 hauteurs mesurées, la courbe est signalée peu fiable."],
-    ["Calcul par tronc", "g = π × D² / 40000 puis V = g × H × f : volume de bois (tronc), du sol jusqu'à une découpe de 7 cm de diamètre, avec le coefficient de forme publié de l'essence (onglet Essences). Le diamètre est en centimètres."],
-    ["Surface utile de la placette", "Surface mesurée de la placette (rayon standard ou réduit), réduite à la partie du cercle située dans la forêt quand la placette déborde de la lisière (sauf si le bois continue au-delà)."],
-    ["Valeurs à l'hectare", "Pour chaque placette : nombre de troncs, somme des g et somme des V, divisés par sa surface utile puis ramenés à l'hectare."],
-    ["Moyenne et marge d'erreur", "Moyenne des placettes, écart-type d'échantillon, erreur type (× √(1 - n/N) avec la correction de population finie), puis marge = t × erreur type avec la loi de Student (niveau de confiance choisi dans Réglages)."],
-    ["Extrapolation", "Moyenne à l'hectare × surface de la parcelle en hectares. Avec des placettes toutes de même surface, c'est la méthode du fichier Excel : moyenne par placette × F, F = surface de la parcelle / surface d'une placette. En inventaire en plein, pas d'extrapolation : les totaux sont des sommes, sans erreur d'échantillonnage."]
+    ["Lire les mesures", "Les fichiers d'Arboreal, ou les arbres saisis dans 2 · Mesurer."],
+    ["Garder les bons arbres", "Seuls les troncs de 7,5 cm de diamètre et plus sont comptés."],
+    ["Compléter les hauteurs", "Les hauteurs mesurées sont gardées ; les autres sont déduites de la grosseur du tronc."],
+    ["Volume de chaque tronc", "Surface de la coupe × hauteur × coefficient de forme de l'essence."],
+    ["Chaque placette ramenée à 1 hectare", "On additionne les arbres de la placette, puis on divise par sa surface (seulement la partie dans la forêt si elle déborde)."],
+    ["Moyenne et marge d'erreur", "On fait la moyenne des placettes ; leurs différences donnent la marge d'erreur."],
+    ["Toute la parcelle", "Moyenne pour 1 hectare × surface de la parcelle. Si l'on a compté tous les arbres, c'est une simple somme, sans marge."]
   ];
   const box = $("#methodSteps"); box.innerHTML = "";
   const ol = el("div", { class: "grid", style: "gap:12px" });
@@ -6160,7 +6156,7 @@ function estimateBlock(opts) {
   // 19/11/2026 : la précision visée se règle ici, avant comme après les premières mesures
   const objIn = el("input", { id: "plObjE", type: "number", min: "1", max: "50", step: "1", value: String(state.config.threshold), style: "width:70px", "aria-label": "Précision visée (± %)" });
   objIn.addEventListener("change", () => { const v = num(objIn.value); if (v >= 1 && v <= 50) { state.config.threshold = v; persist(); renderAll(); } });
-  box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px; flex-wrap:wrap" }, [el("span", { text: "Précision visée : ±" }), objIn, el("span", { text: "% sur le volume (confiance " + cf + " %)" }), el("span", { class: "hint", text: "± 15 % conseillé, ± 10 % pour une vente de bois" })]));
+  box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px; flex-wrap:wrap" }, [el("span", { text: "Précision visée : ±" }), objIn, el("span", { text: "% sur le volume (confiance " + cf + " %)" })]));
   // estimation de départ, variabilité supposée réglable
   const cvIn = el("input", { id: "plCvPrior", type: "number", min: "5", max: "150", step: "5", value: String(Math.round(e.cvPrior * 100)), style: "width:78px", "aria-label": "Variabilité supposée entre placettes (%)" });
   cvIn.addEventListener("change", () => { const v = num(cvIn.value); if (v >= 5 && v <= 150) { plan.cvPrior = v; renderAll(); } });
