@@ -5017,11 +5017,10 @@ function renderFxPlot(body, ss, plot) {
   const d = state.field.draft;
   if (editing && !d._loaded) {
     Object.assign(d, {
-      _loaded: editing.tree_id, sp: editing.fr_name, trunk: editing.trunk_input || editing.diameter, dist: editing.distance, az: editing.azimuth,
+      _loaded: editing.tree_id, sp: editing.fr_name, trunk: editing.trunk_mode === "circ" && editing.trunk_input ? editing.trunk_input : (num(editing.diameter) > 0 ? String(Math.round(num(editing.diameter) * Math.PI * 10) / 10) : ""), dist: editing.distance, az: editing.azimuth,
       L: editing.clino_l, top: editing.clino_top, foot: editing.clino_foot, hDirect: editing.height_source === "direct" ? editing.height : "",
       dmg: editing.damaged_detected === "1", note: editing.comment, carre: editing.carre || ""
     });
-    state.field.trunk = editing.trunk_mode || "diam";
     state.field.hMode = editing.height_source === "clino" ? "clino" : editing.height_source === "direct" ? "direct" : "later";
   }
   const sumG = trees.reduce((s, t) => s + Math.PI * num(t.diameter) ** 2 / 40000, 0);
@@ -5074,6 +5073,7 @@ function renderFxPlot(body, ss, plot) {
   const seg = (opts, cur, on) => el("div", { class: "seg" }, opts.map(([v, t]) => el("button", { type: "button", "aria-pressed": String(cur === v), text: t, onclick: () => on(v) })));
   const reRender = () => { fxSaveDraft(); renderTerrain(); };
 
+  state.field.trunk = "circ";   // saisie au ruban uniquement (19/11/2026) ; un arbre saisi au compas est repris en circonférence
   const trunkLab = state.field.trunk === "circ" ? "Circonférence à 1,30 m (cm)" : "Diamètre à 1,30 m (cm)";
   const hBlock = el("div", { style: "display:flex; flex-direction:column; gap:10px" });
   if (state.field.hMode === "clino") {
@@ -5103,7 +5103,6 @@ function renderFxPlot(body, ss, plot) {
       : el("div", { class: "fx-step" }, [el("h4", { text: "Essence" }), spBox]),
     el("div", { class: "fx-step" }, [
       el("h4", null, [document.createTextNode("Tronc"), el("span", { class: "rd", id: "fxDRead" })]),
-      seg([["circ", "Ruban (circonférence)"], ["diam", "Compas (diamètre)"]], state.field.trunk, v => { state.field.trunk = v; reRender(); }),
       el("label", { class: "f", for: "fxTrunk" }, [trunkLab, el("input", { id: "fxTrunk", type: "text", inputmode: "decimal", autocomplete: "off", class: "fx-big", value: d.trunk || "" })])
     ]),
     modeTige ? el("div", { class: "fx-step" }, [el("h4", { text: "Position" }), el("p", { class: "hint", style: "margin:0", text: "Même position que l'arbre n° " + nSouche + (zone ? (soucheCible.carre ? ", carré " + soucheCible.carre : "") : " : " + fmt(num(soucheCible.distance), 2) + " m à " + Math.round(num(soucheCible.azimuth)) + "°") + ". Chaque tige de 7,5 cm et plus compte comme une tige ; la souche reste un seul arbre." })])
