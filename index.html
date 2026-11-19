@@ -1058,7 +1058,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <summary>Protocole : plan, lisière et accès aux placettes</summary>
     <div>
       <dl class="gloss">
-        <div><dt>Plan de placettes</dt><dd>Les placettes sont placées sur une grille régulière à départ tiré au hasard, une seule fois (échantillonnage systématique) : chaque endroit de la forêt a la même chance d'être mesuré, et la grille couvre toute la parcelle. Une fois le plan figé, on revient aux mêmes placettes à chaque campagne, retrouvées au GPS (sans marquage) : les écarts entre deux campagnes reflètent alors la croissance, pas un changement d'échantillon. Ne déplacez une placette que si son centre est inaccessible (eau, ronces), et notez-le.</dd></div>
+        <div><dt>Plan de placettes</dt><dd>Les placettes sont placées sur une grille régulière à départ tiré au hasard, une seule fois (échantillonnage systématique) : chaque endroit de la forêt a la même chance d'être mesuré, et la grille couvre toute la parcelle. Le nombre de départ repose sur une variabilité supposée. Dès 5 placettes mesurées (seuil réglable dans Réglages), l'application recalcule le nombre nécessaire pour la précision visée : les placettes ajoutées vont dans les zones les moins couvertes, et seules des placettes pas encore mesurées peuvent être retirées. Les autres gardent leur place et leur numéro. Une fois le plan figé, on revient aux mêmes placettes à chaque campagne, retrouvées au GPS (sans marquage) : les écarts entre deux campagnes reflètent alors la croissance, pas un changement d'échantillon. Ne déplacez une placette que si son centre est inaccessible (eau, ronces), et notez-le.</dd></div>
         <div><dt>Placettes en lisière</dt><dd>Une placette peut déborder du contour. L'application calcule la partie du cercle qui est dans la forêt et l'utilise comme surface de la placette. Sur le terrain, ne comptez que les arbres côté forêt : au-delà d'une vraie lisière (champ, prairie, chemin), il n'y en a de toute façon pas. Si la limite passe au milieu du bois (chez le voisin, c'est aussi du bois), mesurez tout le cercle et indiquez « encore du bois au-delà » sur la placette : elle garde alors sa surface entière.</dd></div>
         <div><dt>Se rendre à une placette (sans marquage)</dt><dd>Les placettes sont retrouvées au GPS, sans marquage : rien ne reste en forêt d'une campagne à l'autre, seul le plan est gardé dans l'application. Sous les arbres, le GPS d'un téléphone se trompe souvent de 5 à 20 m. Le guidage affiche la précision du GPS et la distance au centre prévu ; la placette est atteinte à moins de 5 m, ou à moins de la précision du GPS quand elle est plus large. Matérialisez alors le centre le temps de la mesure (jalon ou piquet temporaire, retiré à la fin) et relevez sa position (1 minute). Avant de partir, enregistrez la carte hors ligne : le réseau ne passe pas toujours en forêt.</dd></div>
       </dl>
@@ -4183,7 +4183,7 @@ function loadProject(j, quiet) {
   state.plotLabels = j.plotLabels || {};
   state.config = Object.assign({}, CONFIG_DEFAULT, j.config || {});
   state.config.refZone = false;   // zone de référence 50 × 50 m abandonnée le 06/11/2026
-  if (!(j.config && j.config.normeV1)) { state.config.threshold = 15; state.config.conf = 0.90; state.config.normeV1 = true; }   // 06/11/2026 : norme ± 15 % à 90 %
+  if (!(j.config && j.config.normeV1)) { const ancien = j.config && num(j.config.threshold) > 0 ? num(j.config.threshold) : 10; if (j.plan && j.plan.est0 && !j.plan.est0.objectif) j.plan.est0.objectif = ancien; state.config.threshold = 15; state.config.conf = 0.90; state.config.normeV1 = true; }   // 06/11/2026 : norme ± 15 % à 90 %
   if (!(j.config && j.config.posModeV2)) { state.config.posMode = "plan"; state.config.posModeV2 = true; }   // 06/11/2026 : centre du plan par défaut
   state.field = Object.assign({}, FIELD_DEFAULT, j.field || {});
   state.plan = Object.assign(JSON.parse(JSON.stringify(PLAN_DEFAULT)), j.plan || {});
@@ -5939,7 +5939,7 @@ function blocCompleter(e) {
       const nums = plRemoveExtra(k);
       if (!nums.length) return toast("Aucune placette non mesurée à retirer");
       plan.retraits = (plan.retraits || []).concat([{ at: new Date().toISOString(), nums, cv: e.m.cv, base: e.m.base, objectif: th }]);
-      const e1 = plotEstimate(); if (e1 && e1.best) plan.est0 = { n: e1.best.n, cv: e.m.cv, measured: true, at: new Date().toISOString() };
+      const e1 = plotEstimate(); if (e1 && e1.best) plan.est0 = { n: e1.best.n, cv: e.m.cv, measured: true, objectif: state.config.threshold, at: new Date().toISOString() };
       PL.fitKey = ""; renderAll();
       toast("Retirée" + (nums.length > 1 ? "s" : "") + " du plan : n° " + nums.join(", "), 5000);
     } })]));
@@ -5960,7 +5960,7 @@ function blocCompleter(e) {
     if (!pts.length) return toast("Plus de place dans la forêt sans chevaucher une placette existante");
     const e1 = plotEstimate();
     plan.ajouts = (plan.ajouts || []).concat([{ at: pts[0].added, n: pts.length, cv: e.m.cv, base: e.m.base, objectif: th }]);
-    if (e1 && e1.best) plan.est0 = { n: e1.best.n, cv: e.m.cv, measured: true, at: new Date().toISOString() };
+    if (e1 && e1.best) plan.est0 = { n: e1.best.n, cv: e.m.cv, measured: true, objectif: state.config.threshold, at: new Date().toISOString() };
     PL.fitKey = ""; renderAll();
     toast(pts.length + " placette" + (pts.length > 1 ? "s ajoutées" : " ajoutée") + " : n° " + pts[0].num + (pts.length > 1 ? " à " + pts[pts.length - 1].num : ""), 4500);
   } })]));
@@ -6051,6 +6051,18 @@ function blocTemps(n) {
   return box;
 }
 
+/* pourquoi l'estimation a changé depuis le plan : variabilité et précision visée, chacune avec son effet */
+function raisonsEcart(e, ref, more) {
+  const dCv = Math.round(e.m.cv * 100) - Math.round(ref.cv * 100);
+  const objRef = num(ref.objectif), dObj = objRef > 0 ? Math.round(state.config.threshold) - Math.round(objRef) : 0;
+  const r = [];
+  if (dCv) r.push("la variabilité mesurée est de " + fmt(e.m.cv * 100, 0) + " % au lieu des " + fmt(ref.cv * 100, 0) + " % " + (ref.measured ? "mesurés alors" : "supposés") + " (" + (dCv > 0 ? "plus" : "moins") + " de placettes)");
+  if (dObj) r.push("la précision visée est passée de ± " + fmt(objRef, 0) + " % à ± " + fmt(state.config.threshold, 0) + " % (" + (dObj > 0 ? "moins" : "plus") + " de placettes)");
+  const explique = (dCv > 0 && more) || (dCv < 0 && !more) || (dObj > 0 && !more) || (dObj < 0 && more);
+  let t = r.length ? "Pourquoi : " + r.join(" ; ") + "." : "";
+  if (!explique) t += (t ? " " : "") + "D'autres réglages (précision visée, confiance, correction de population finie) ont changé depuis le plan.";
+  return t;
+}
 /* bloc « Combien de placettes ? » (étape 1 et onglet Précision) */
 function estimateBlock(opts) {
   opts = opts || {};
@@ -6063,7 +6075,7 @@ function estimateBlock(opts) {
   const cvIn = el("input", { id: "plCvPrior", type: "number", min: "5", max: "150", step: "5", value: String(Math.round(e.cvPrior * 100)), style: "width:78px", "aria-label": "Variabilité supposée entre placettes (%)" });
   cvIn.addEventListener("change", () => { const v = num(cvIn.value); if (v >= 5 && v <= 150) { plan.cvPrior = v; renderAll(); } });
   box.appendChild(el("div", { class: "row", style: "align-items:center; gap:8px" }, [
-    el("span", { html: "Au départ : environ <b>" + e.prior.n + " placettes</b>, en supposant une variabilité de" }),
+    el("span", { html: "Avant toute mesure, pour ± " + th + " % : environ <b>" + e.prior.n + " placettes</b>, en supposant une variabilité de" }),
     cvIn, el("span", { text: "% entre placettes." })
   ]));
   box.appendChild(el("p", { class: "hint", style: "margin:0", text: "50 % est la valeur d'exemple du protocole de suivi des réserves forestières (PSDRF). Une plantation régulière, comme une peupleraie, varie en général moins ; une forêt mélangée et irrégulière plutôt plus. Ce n'est qu'une hypothèse : la variabilité réelle la remplace dès 2 placettes mesurées." }));
@@ -6075,8 +6087,7 @@ function estimateBlock(opts) {
       const more = e.cur.n > ref.n;
       box.appendChild(el("div", { class: "note " + (more ? "warn" : "info"), html: "<b>L'estimation a changé : " + ref.n + " → " + e.cur.n + " placettes.</b> " +
         (ref.fromPrior ? "" : "Le plan a été fait sur une estimation de " + ref.n + " le " + new Date(ref.at).toLocaleDateString("fr-FR") + ". ") +
-        (more ? "La forêt est plus variable que supposé (" + fmt(e.m.cv * 100, 0) + " % au lieu de " + fmt(ref.cv * 100, 0) + " %) : il faut plus de placettes pour atteindre ± " + th + " %."
-              : "La forêt est moins variable que supposé (" + fmt(e.m.cv * 100, 0) + " % au lieu de " + fmt(ref.cv * 100, 0) + " %) : moins de placettes suffisent.") +
+        (more ? "Il faut plus de placettes pour atteindre ± " + th + " %. " : "Moins de placettes suffisent pour ± " + th + " %. ") + raisonsEcart(e, ref, more) +
         (more && opts.take ? " Ajoutez-les ci-dessous, dans les zones les moins couvertes." : "") }));
     } else box.appendChild(el("p", { class: "hint", style: "margin:0", text: "L'estimation de départ se confirme." }));
     if (opts.take) { const bc = blocCompleter(e); if (bc) box.appendChild(bc); }
@@ -6546,7 +6557,7 @@ function renderFxPlan(body) {
             Object.assign(plan, { points: g.points, spacing: g.spacing, marginUsed: g.marginUsed, at: new Date().toISOString(), ringKey: plHash(ring) });
             // estimation retenue au moment du plan : sert à signaler ensuite si elle change
             const e0 = plotEstimate();
-            if (e0 && e0.best) plan.est0 = { n: e0.best.n, cv: e0.cur ? e0.m.cv : e0.cvPrior, measured: !!e0.cur, at: new Date().toISOString() };
+            if (e0 && e0.best) plan.est0 = { n: e0.best.n, cv: e0.cur ? e0.m.cv : e0.cvPrior, measured: !!e0.cur, objectif: state.config.threshold, at: new Date().toISOString() };
             PL.fitKey = ""; renderAll();
             if (!g.points.length) toast("Aucune placette ne tient dans ce contour : réduisez le rayon");
             else if (g.points.length !== n) toast(g.points.length + " placettes placées (la forme de la parcelle ne permet pas exactement " + n + ")", 4500);
