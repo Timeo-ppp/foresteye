@@ -1091,7 +1091,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
 
   <!-- voie Arboreal -->
   <div id="mzArboreal" class="panel" hidden>
-    <div class="seg fx-mode" role="group" aria-label="Étape Arboreal" id="arbSteps">
+    <div class="seg fx-mode" role="group" aria-label="Étape Arboreal" id="arbSteps" hidden>
       <button type="button" data-arb="import" aria-pressed="true">a · Importer les fichiers</button>
       <button type="button" data-arb="heights" aria-pressed="false">b · Vérifier les hauteurs</button>
     </div>
@@ -1116,6 +1116,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <input type="file" id="filePick" multiple accept=".csv,.txt,.geojson,.json,.kml" hidden>
       </div>
       <div id="importReport"></div>
+      <div id="arbHauteurs"></div>
     </div>
 
     <div id="fxHBody" class="panel" hidden></div>
@@ -4723,7 +4724,9 @@ function voieActive() {
   return reel.length && reel.every(s => s.field) ? "foresteye" : "arboreal";
 }
 function renderMesurer() {
-  const voie = voieActive(), arbStep = state.ui.arbStep || "import";
+  // 19/11/2026 : les hauteurs viennent de l'export Arboreal, plus d'étape b ; seul l'import reste
+  state.ui.arbStep = "import";
+  const voie = voieActive(), arbStep = "import";
   $$(".voie").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.voie === voie)));
   $("#voieNone").hidden = !!voie;
   $("#mzArboreal").hidden = voie !== "arboreal";
@@ -4740,6 +4743,14 @@ function renderMesurer() {
     html: "<b>Version en ligne : capteurs bloqués.</b> Dans cette page claude.ai, le téléphone ne donne accès ni au GPS, ni à la boussole, ni à la caméra. La saisie manuelle fonctionne entièrement. Pour utiliser les capteurs et travailler sans réseau, ouvrez la version installée sur le téléphone."
   }));
   fxSensChips();
+  const ah = $("#arbHauteurs"); ah.innerHTML = "";
+  if (voie === "arboreal") {
+    const rows = hauteursParEssence().filter(h => h.n || h.k);
+    if (rows.length) ah.appendChild(el("div", { class: "note info", style: "margin-top:10px" }, [
+      el("b", { text: "Hauteurs reçues d'Arboreal" }),
+      el("ul", { style: "margin:6px 0 0; padding-left:20px" }, rows.map(h => el("li", { text: h.nom + " : " + txtHauteurs(h.n, h.k) })))
+    ]));
+  }
   const hb = $("#fxHBody"); hb.innerHTML = "";
   if (voie === "arboreal" && arbStep === "heights") renderFxHeights(hb);
   const fb = $("#fxBody"); fb.innerHTML = "";
