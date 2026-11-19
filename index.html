@@ -1180,8 +1180,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
 <!-- ============ PARCELLE ============ -->
 <section id="p-parcelle" class="panel" role="tabpanel" hidden>
   <div class="page-head">
-    <span class="eyebrow">Détails</span>
-    <h2>Réglages de la parcelle et de l'analyse</h2>
+    <span class="eyebrow">Plus</span>
+    <h2>Réglages</h2>
     <p>La surface totale de la parcelle sert à extrapoler les mesures des placettes à l'ensemble du boisement. Elle se règle en principe à l'étape 1 · Préparer, en délimitant la forêt.</p>
   </div>
 
@@ -1202,7 +1202,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
       <p class="hint" style="margin-top:12px" id="parcFromPoly"></p>
     </div>
 
-    <div class="card">
+    <div class="card" hidden>
       <h3 class="blk">Contour de la parcelle</h3>
       <p class="hint" style="margin-top:4px">Le plus simple : onglet <b>1 · Préparer</b>, où l'on touche la parcelle cadastrale ou trace le contour au doigt. Sinon, importez un relevé GPS du contour (CSV Latitude/Longitude, GeoJSON ou KML), ou collez les points ci-dessous.</p>
       <div id="polyState" style="margin-top:10px"></div>
@@ -1222,9 +1222,9 @@ input.fx-big{font-size:18px; padding:10px 12px}
   </div>
 
   <div class="card">
-    <h3 class="blk">Paramètres de l'analyse</h3>
+    <h3 class="blk">Précision visée</h3>
     <div class="row" style="margin-top:12px">
-      <label class="f" for="confLevel"><span>Niveau de confiance <button class="helpdot" type="button" data-aide="Probabilité que la vraie valeur soit dans l'intervalle annoncé. À 90 % (par défaut), une fois sur dix la vraie valeur est en dehors.">?</button></span>
+      <label class="f" for="confLevel" hidden><span>Niveau de confiance <button class="helpdot" type="button" data-aide="Probabilité que la vraie valeur soit dans l'intervalle annoncé. À 90 % (par défaut), une fois sur dix la vraie valeur est en dehors.">?</button></span>
         <select id="confLevel">
           <option value="0.8">80 %</option>
           <option value="0.9" selected>90 % (par défaut)</option>
@@ -1236,20 +1236,20 @@ input.fx-big{font-size:18px; padding:10px 12px}
         <span class="sub">norme ForestEye : ± 15 % (± 10 % pour une vente de bois)</span>
         <input type="number" id="errThreshold" value="15" min="1" max="50" step="0.5" style="width:110px">
       </label>
-      <label class="f">Hauteurs non mesurées
+      <label class="f" hidden>Hauteurs non mesurées
         <select id="hMode">
           <option value="courbe">Estimées par la courbe de hauteur</option>
           <option value="brute">Utilisées telles qu'importées</option>
         </select>
       </label>
-      <label class="f" for="areaMode"><span>Surface de placette retenue <button class="helpdot" type="button" data-aide="Surface qui sert à ramener chaque placette à l'hectare. Par défaut la surface réelle : celle du cercle mesuré (rayon standard ou réduit), corrigée en lisière.">?</button></span>
+      <label class="f" for="areaMode" hidden><span>Surface de placette retenue <button class="helpdot" type="button" data-aide="Surface qui sert à ramener chaque placette à l'hectare. Par défaut la surface réelle : celle du cercle mesuré (rayon standard ou réduit), corrigée en lisière.">?</button></span>
         <select id="areaMode">
           <option value="real" selected>Surface réelle mesurée (samples.csv)</option>
           <option value="theo">Surface théorique (π × rayon²)</option>
           <option value="fixed">Valeur fixe 200 m²</option>
         </select>
       </label>
-      <label class="f" for="fpcMode"><span>Correction de population finie <button class="helpdot" type="button" data-aide="Quand on mesure une part notable de la forêt, l'incertitude baisse : l'erreur type est multipliée par √(1 - n/N), n placettes mesurées sur N placettes que contient la forêt.">?</button></span>
+      <label class="f" for="fpcMode" hidden><span>Correction de population finie <button class="helpdot" type="button" data-aide="Quand on mesure une part notable de la forêt, l'incertitude baisse : l'erreur type est multipliée par √(1 - n/N), n placettes mesurées sur N placettes que contient la forêt.">?</button></span>
         <span class="sub">tient compte de la petite taille de la forêt</span>
         <select id="fpcMode">
           <option value="1">Oui (recommandé)</option>
@@ -1257,11 +1257,11 @@ input.fx-big{font-size:18px; padding:10px 12px}
         </select>
       </label>
     </div>
-    <p class="hint" style="margin:12px 0 0">Correction de population finie : une forêt de 0,6 ha ne contient qu'une trentaine de placettes de 200 m². Quand on en mesure une part notable, l'incertitude baisse d'autant : l'erreur type est multipliée par √(1 - n/N), N étant le nombre de placettes que contient la forêt.</p>
-    <p class="hint" style="margin:8px 0 0">Pour une placette qui déborde du contour, seule la partie du cercle située dans la forêt est retenue (voir « Placettes en lisière » dans 1 · Préparer).</p>
+    <p class="hint" style="margin:12px 0 0" hidden>Correction de population finie : une forêt de 0,6 ha ne contient qu'une trentaine de placettes de 200 m². Quand on en mesure une part notable, l'incertitude baisse d'autant : l'erreur type est multipliée par √(1 - n/N), N étant le nombre de placettes que contient la forêt.</p>
+    <p class="hint" style="margin:8px 0 0" hidden>Pour une placette qui déborde du contour, seule la partie du cercle située dans la forêt est retenue (voir « Placettes en lisière » dans 1 · Préparer).</p>
   </div>
 
-  <div class="card">
+  <div class="card" hidden>
     <h3 class="blk">Diamètre minimal mesuré <button class="helpdot" type="button" data-aide="Les arbres plus fins que ce seuil ne sont pas comptés : ni dans le nombre de troncs, ni dans la surface terrière, ni dans le volume. Un tronc importé sous le seuil est gardé dans le projet mais exclu des calculs.">?</button></h3>
     <div class="row" style="margin-top:12px">
       <label class="f">Diamètre à 1,30 m (cm)
@@ -1275,7 +1275,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <p class="hint" style="margin:6px 0 0">Si une placette est trop longue à mesurer, réduisez son rayon en l'ouvrant (2 · Mesurer), jamais le seuil.</p>
   </div>
 
-  <div class="card">
+  <div class="card" hidden>
     <h3 class="blk">Méthode d'inventaire <button class="helpdot" type="button" data-aide="Inventaire en plein : on mesure tous les arbres de la zone, les totaux sont des sommes exactes, sans marge d'échantillonnage. Placettes : on mesure de petits cercles répartis dans la forêt, puis on extrapole, avec une marge d'erreur.">?</button></h3>
     <div class="row" style="margin-top:12px">
       <label class="f">Méthode
@@ -1302,7 +1302,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
     <p class="hint" style="margin:10px 0 0">Par défaut : moins de 1 ha, compter tous les arbres ; de 1 à 20 ha, placettes ; au-delà de 20 ha, placettes avec un avertissement sur le nombre de journées de terrain. Dès la première mesure, la méthode en cours est gardée : vous pouvez toujours choisir l'autre ici ou dans 1 · Préparer.</p>
   </div>
 
-  <div class="card">
+  <div class="card" hidden>
     <h3 class="blk">Forêts publiques (essais)</h3>
     <label class="pl-chk" style="margin-top:10px"><input type="checkbox" id="cfgShowFP"> Afficher les forêts publiques (essais)</label>
     <p class="hint" style="margin:8px 0 0">Ajoute à la carte de 1 · Préparer le calque des forêts publiques (ONF, via l'IGN) et la liste des plus proches, utiles pour trouver un terrain d'essai. Désactivé par défaut.</p>
@@ -1344,7 +1344,7 @@ input.fx-big{font-size:18px; padding:10px 12px}
 <!-- ============ ESSENCES ============ -->
 <section id="p-essences" class="panel" role="tabpanel" hidden>
   <div class="page-head">
-    <span class="eyebrow">Détails</span>
+    <span class="eyebrow">Plus</span>
     <h2>Essences et coefficients de forme</h2>
     <p>Le coefficient de forme (f) traduit le fait qu'un tronc n'est pas un cylindre parfait. Il intervient directement dans le volume de bois (tronc) : <span class="formula">V = g × H × f</span>.</p>
   </div>
@@ -7053,6 +7053,8 @@ function restore() {
    ================================================================== */
 let renderScheduled = false;
 function renderAll(goImport, report) {
+  // 19/11/2026 : réglages retirés de l'écran, figés sur les valeurs recommandées
+  Object.assign(state.config, { conf: 0.90, fpc: true, heightMode: "courbe", areaMode: "real", showFP: false });
   CURVES_CACHE = null;
   $("#cntSess").textContent = String(state.sessions.length);
   $("#cntTrees").textContent = String(allTrees().length);
