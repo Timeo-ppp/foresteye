@@ -1521,8 +1521,8 @@ input.fx-big{font-size:18px; padding:10px 12px}
   <div id="mapLegend" class="legend"></div>
 
   <div>
-    <h3 class="blk">Plan de placette (hors connexion)</h3>
-    <p class="hint">Vue à plat d'une placette à partir des coordonnées locales relevées par l'application. Ne nécessite aucun fond de carte.</p>
+    <h3 class="blk">Plan de placette</h3>
+    <p class="hint">Vue à plat d'une placette : chaque arbre à sa place dans le cercle.</p>
     <div class="row" style="margin-top:10px">
       <label class="f">Placette <select id="planPlot"></select></label>
     </div>
@@ -3975,6 +3975,10 @@ function renderPlan() {
   if (!trees.length) { box.appendChild(el("p", { class: "hint", text: "Cette placette ne contient pas de coordonnées locales." })); return; }
   const R = Math.max(p.radius, Math.max(...trees.map(t => Math.hypot(t.x, t.z))) + 0.5);
   const S = 420, C = S / 2, k = (S / 2 - 26) / R;
+  // 19/11/2026 : même rotation que sur la carte (automatique pour Arboreal, aucune pour la saisie manuelle)
+  const pl = trees[0].plot, rot = plotRotAuto(pl), oriente = !!(p.raw.field || rot.ok);
+  const th = plotRotDeg(pl) * Math.PI / 180;
+  const xy = t => { const u = t.x, v = -t.z; const E = u * Math.cos(th) + v * Math.sin(th), N = -u * Math.sin(th) + v * Math.cos(th); return [C + E * k, C - N * k]; };
   let svg = '<svg class="chart" viewBox="0 0 ' + S + ' ' + S + '" role="img" aria-label="Plan de la placette ' + p.label + '">';
   svg += '<circle cx="' + C + '" cy="' + C + '" r="' + (p.radius * k).toFixed(1) + '" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>';
   [2, 4, 6].filter(r => r < p.radius).forEach(r => {
@@ -3984,15 +3988,16 @@ function renderPlan() {
   svg += '<line x1="' + (C - 7) + '" x2="' + (C + 7) + '" y1="' + C + '" y2="' + C + '" stroke="var(--ink-2)" stroke-width="1.4"/>';
   svg += '<line x1="' + C + '" x2="' + C + '" y1="' + (C - 7) + '" y2="' + (C + 7) + '" stroke="var(--ink-2)" stroke-width="1.4"/>';
   trees.forEach(t => {
-    const x = C + t.x * k, y = C + t.z * k;
+    const [x, y] = xy(t);
     const r = Math.max(3, Math.min(13, 2.5 + (isFinite(t.D) ? t.D : 10) / 3.4));
     const col = state.config.colorBy === "diam" ? diamColor(t.D) : "var(" + SERIES[Math.max(0, allSpeciesNames().indexOf(t.fr)) % SERIES.length] + ")";
     svg += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + col + '" stroke="var(--surface)" stroke-width="2"><title>' + t.fr + " · D " + fmt(t.D, 1) + " cm, H " + fmt(t.H, 1) + ' m</title></circle>';
   });
+  if (oriente) svg += '<text x="' + (S - 18) + '" y="22" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink-2)" font-family="Archivo, sans-serif">N</text><line x1="' + (S - 18) + '" x2="' + (S - 18) + '" y1="44" y2="27" stroke="var(--ink-2)" stroke-width="1.6"/><path d="M' + (S - 22) + ' 32 L' + (S - 18) + ' 26 L' + (S - 14) + ' 32" fill="none" stroke="var(--ink-2)" stroke-width="1.6"/>';
   svg += '<text x="' + C + '" y="' + (S - 6) + '" text-anchor="middle" font-size="10.5" fill="var(--ink-2)" font-family="Archivo, sans-serif">Placette ' + p.label + " - " + trees.length + " arbres - rayon " + fmt(p.radius, 2) + " m</text>";
   svg += "</svg>";
   box.innerHTML = svg;
-  box.appendChild(el("p", { class: "hint", style: "margin-top:8px", text: p.raw.field ? "Placette saisie avec ForestEye : positions issues de la distance et de l'azimut, nord en haut." : "Repère local de l'application terrain : le centre est le point de station. Le nord n'est pas connu, le plan n'est donc pas orienté." }));
+  box.appendChild(el("p", { class: "hint", style: "margin-top:8px", text: p.raw.field ? "Placette saisie avec ForestEye : positions issues de la distance et de l'azimut, nord en haut." : oriente ? "Nord en haut : l'orientation est corrigée automatiquement, comme sur la carte." : "Orientation non corrigée (moins de 3 arbres, ou GPS des arbres trop dispersé) : le nord n'est pas connu pour cette placette." }));
 }
 
 /* ==================================================================
